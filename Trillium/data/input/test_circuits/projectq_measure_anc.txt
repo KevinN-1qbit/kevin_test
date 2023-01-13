@@ -1,0 +1,603 @@
+Allocate | Qureg[5]
+H | Qureg[5]
+Allocate | Qureg[0]
+CX | ( Qureg[0], Qureg[5] )
+T | Qureg[0]
+T^\dagger | Qureg[5]
+Allocate | Qureg[1]
+CX | ( Qureg[1], Qureg[5] )
+T | Qureg[5]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[5] )
+T^\dagger | Qureg[5]
+Allocate | Qureg[6]
+H | Qureg[6]
+CX | ( Qureg[1], Qureg[5] )
+Allocate | Qureg[2]
+T | Qureg[5]
+CX | ( Qureg[2], Qureg[6] )
+T | Qureg[2]
+T^\dagger | Qureg[6]
+H | Qureg[5]
+CX | ( Qureg[5], Qureg[6] )
+T | Qureg[6]
+CX | ( Qureg[5], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[5], Qureg[2] )
+CX | ( Qureg[2], Qureg[6] )
+T^\dagger | Qureg[6]
+Allocate | Qureg[3]
+H | Qureg[3]
+CX | ( Qureg[5], Qureg[6] )
+Allocate | Qureg[4]
+H | Qureg[4]
+T | Qureg[6]
+CX | ( Qureg[4], Qureg[3] )
+T | Qureg[4]
+T^\dagger | Qureg[3]
+H | Qureg[6]
+CX | ( Qureg[6], Qureg[3] )
+CX | ( Qureg[6], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[6], Qureg[4] )
+T | Qureg[3]
+CX | ( Qureg[4], Qureg[3] )
+T^\dagger | Qureg[3]
+CX | ( Qureg[6], Qureg[3] )
+T | Qureg[6]
+H | Qureg[6]
+CX | ( Qureg[2], Qureg[6] )
+T | Qureg[2]
+T^\dagger | Qureg[6]
+T | Qureg[5]
+CX | ( Qureg[5], Qureg[6] )
+CX | ( Qureg[5], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[5], Qureg[2] )
+T | Qureg[6]
+CX | ( Qureg[2], Qureg[6] )
+T^\dagger | Qureg[6]
+CX | ( Qureg[5], Qureg[6] )
+T | Qureg[5]
+H | Qureg[5]
+CX | ( Qureg[0], Qureg[5] )
+T | Qureg[0]
+T^\dagger | Qureg[5]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[5] )
+T | Qureg[5]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[5] )
+T^\dagger | Qureg[5]
+CX | ( Qureg[1], Qureg[5] )
+T | Qureg[5]
+H | Qureg[5]
+Deallocate | Qureg[5]
+T | Qureg[6]
+H | Qureg[6]
+Deallocate | Qureg[6]
+Allocate | Qureg[7]
+H | Qureg[7]
+CX | ( Qureg[0], Qureg[7] )
+T | Qureg[0]
+T^\dagger | Qureg[7]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[7] )
+T | Qureg[7]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[7] )
+T^\dagger | Qureg[7]
+H | Qureg[2]
+CX | ( Qureg[1], Qureg[7] )
+T | Qureg[7]
+CX | ( Qureg[4], Qureg[2] )
+T | Qureg[4]
+T^\dagger | Qureg[2]
+H | Qureg[7]
+CX | ( Qureg[7], Qureg[2] )
+CX | ( Qureg[7], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[7], Qureg[4] )
+T | Qureg[2]
+CX | ( Qureg[4], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[7], Qureg[2] )
+T | Qureg[7]
+H | Qureg[7]
+CX | ( Qureg[0], Qureg[7] )
+T | Qureg[0]
+T^\dagger | Qureg[7]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[7] )
+T | Qureg[7]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[7] )
+T^\dagger | Qureg[7]
+CX | ( Qureg[1], Qureg[7] )
+T | Qureg[7]
+H | Qureg[7]
+Deallocate | Qureg[7]
+T | Qureg[1]
+H | Qureg[1]
+CX | ( Qureg[0], Qureg[1] )
+T | Qureg[0]
+T^\dagger | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[4], Qureg[0] )
+T | Qureg[1]
+T^\dagger | Qureg[0]
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[0], Qureg[1] )
+T^\dagger | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+T | Qureg[4]
+Allocate | Qureg[8]
+H | Qureg[8]
+T | Qureg[1]
+CX | ( Qureg[4], Qureg[0] )
+X | Qureg[4]
+CX | ( Qureg[4], Qureg[0] )
+H | Qureg[1]
+CX | ( Qureg[0], Qureg[8] )
+T | Qureg[0]
+T^\dagger | Qureg[8]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[1], Qureg[8] )
+T | Qureg[8]
+T | Qureg[2]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[8] )
+T^\dagger | Qureg[8]
+Allocate | Qureg[9]
+H | Qureg[9]
+CX | ( Qureg[1], Qureg[8] )
+H | Qureg[2]
+CX | ( Qureg[4], Qureg[2] )
+T | Qureg[8]
+CX | ( Qureg[2], Qureg[9] )
+T | Qureg[2]
+T^\dagger | Qureg[9]
+H | Qureg[8]
+CX | ( Qureg[8], Qureg[9] )
+T | Qureg[9]
+CX | ( Qureg[8], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[8], Qureg[2] )
+CX | ( Qureg[2], Qureg[9] )
+T^\dagger | Qureg[9]
+T | Qureg[3]
+CX | ( Qureg[8], Qureg[9] )
+T | Qureg[9]
+CX | ( Qureg[4], Qureg[3] )
+T | Qureg[4]
+T^\dagger | Qureg[3]
+H | Qureg[9]
+CX | ( Qureg[9], Qureg[3] )
+CX | ( Qureg[9], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[9], Qureg[4] )
+T | Qureg[3]
+CX | ( Qureg[4], Qureg[3] )
+T^\dagger | Qureg[3]
+CX | ( Qureg[9], Qureg[3] )
+T | Qureg[9]
+H | Qureg[9]
+CX | ( Qureg[2], Qureg[9] )
+T | Qureg[2]
+T^\dagger | Qureg[9]
+T | Qureg[8]
+CX | ( Qureg[8], Qureg[9] )
+CX | ( Qureg[8], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[8], Qureg[2] )
+T | Qureg[9]
+CX | ( Qureg[2], Qureg[9] )
+T^\dagger | Qureg[9]
+CX | ( Qureg[8], Qureg[9] )
+T | Qureg[8]
+H | Qureg[8]
+CX | ( Qureg[0], Qureg[8] )
+T | Qureg[0]
+T^\dagger | Qureg[8]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[8] )
+T | Qureg[8]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[8] )
+T^\dagger | Qureg[8]
+CX | ( Qureg[1], Qureg[8] )
+T | Qureg[8]
+H | Qureg[8]
+Deallocate | Qureg[8]
+T | Qureg[9]
+H | Qureg[9]
+Deallocate | Qureg[9]
+CX | ( Qureg[4], Qureg[0] )
+Allocate | Qureg[10]
+H | Qureg[10]
+T | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[4], Qureg[2] )
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[0], Qureg[10] )
+T | Qureg[0]
+T^\dagger | Qureg[10]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[1], Qureg[10] )
+T | Qureg[10]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[10] )
+T^\dagger | Qureg[10]
+H | Qureg[2]
+CX | ( Qureg[1], Qureg[10] )
+T | Qureg[10]
+CX | ( Qureg[4], Qureg[2] )
+T | Qureg[4]
+T^\dagger | Qureg[2]
+H | Qureg[10]
+CX | ( Qureg[10], Qureg[2] )
+CX | ( Qureg[10], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[10], Qureg[4] )
+T | Qureg[2]
+CX | ( Qureg[4], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[10], Qureg[2] )
+T | Qureg[10]
+H | Qureg[10]
+CX | ( Qureg[0], Qureg[10] )
+T | Qureg[0]
+T^\dagger | Qureg[10]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[10] )
+T | Qureg[10]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[10] )
+T^\dagger | Qureg[10]
+CX | ( Qureg[1], Qureg[10] )
+T | Qureg[10]
+H | Qureg[10]
+Deallocate | Qureg[10]
+T | Qureg[1]
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[4], Qureg[1] )
+H | Qureg[1]
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[0], Qureg[1] )
+T | Qureg[0]
+T^\dagger | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+T | Qureg[1]
+CX | ( Qureg[4], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[0], Qureg[1] )
+T^\dagger | Qureg[1]
+Allocate | Qureg[11]
+H | Qureg[11]
+CX | ( Qureg[4], Qureg[1] )
+T | Qureg[1]
+CX | ( Qureg[0], Qureg[11] )
+T | Qureg[0]
+T^\dagger | Qureg[11]
+H | Qureg[1]
+CX | ( Qureg[1], Qureg[11] )
+T | Qureg[11]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[11] )
+T^\dagger | Qureg[11]
+Allocate | Qureg[12]
+H | Qureg[12]
+CX | ( Qureg[1], Qureg[11] )
+T | Qureg[2]
+H | Qureg[2]
+T | Qureg[11]
+CX | ( Qureg[2], Qureg[12] )
+T | Qureg[2]
+T^\dagger | Qureg[12]
+H | Qureg[11]
+CX | ( Qureg[11], Qureg[12] )
+T | Qureg[12]
+T | Qureg[4]
+CX | ( Qureg[11], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[11], Qureg[2] )
+CX | ( Qureg[2], Qureg[12] )
+T^\dagger | Qureg[12]
+T | Qureg[3]
+CX | ( Qureg[11], Qureg[12] )
+X | Qureg[4]
+H | Qureg[4]
+T | Qureg[12]
+CX | ( Qureg[4], Qureg[3] )
+T | Qureg[4]
+T^\dagger | Qureg[3]
+H | Qureg[12]
+CX | ( Qureg[12], Qureg[3] )
+CX | ( Qureg[12], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[12], Qureg[4] )
+T | Qureg[3]
+CX | ( Qureg[4], Qureg[3] )
+T^\dagger | Qureg[3]
+CX | ( Qureg[12], Qureg[3] )
+T | Qureg[12]
+H | Qureg[12]
+CX | ( Qureg[2], Qureg[12] )
+T | Qureg[2]
+T^\dagger | Qureg[12]
+T | Qureg[11]
+CX | ( Qureg[11], Qureg[12] )
+CX | ( Qureg[11], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[11], Qureg[2] )
+T | Qureg[12]
+CX | ( Qureg[2], Qureg[12] )
+T^\dagger | Qureg[12]
+CX | ( Qureg[11], Qureg[12] )
+T | Qureg[11]
+H | Qureg[11]
+CX | ( Qureg[0], Qureg[11] )
+T | Qureg[0]
+T^\dagger | Qureg[11]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[11] )
+T | Qureg[11]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[11] )
+T^\dagger | Qureg[11]
+CX | ( Qureg[1], Qureg[11] )
+T | Qureg[11]
+H | Qureg[11]
+Deallocate | Qureg[11]
+T | Qureg[12]
+H | Qureg[12]
+Deallocate | Qureg[12]
+Allocate | Qureg[13]
+H | Qureg[13]
+CX | ( Qureg[0], Qureg[13] )
+T | Qureg[0]
+T^\dagger | Qureg[13]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[13] )
+T | Qureg[13]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[13] )
+T^\dagger | Qureg[13]
+H | Qureg[2]
+CX | ( Qureg[1], Qureg[13] )
+T | Qureg[13]
+CX | ( Qureg[4], Qureg[2] )
+T | Qureg[4]
+T^\dagger | Qureg[2]
+H | Qureg[13]
+CX | ( Qureg[13], Qureg[2] )
+CX | ( Qureg[13], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[13], Qureg[4] )
+T | Qureg[2]
+CX | ( Qureg[4], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[13], Qureg[2] )
+T | Qureg[13]
+H | Qureg[13]
+CX | ( Qureg[0], Qureg[13] )
+T | Qureg[0]
+T^\dagger | Qureg[13]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[13] )
+T | Qureg[13]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[13] )
+T^\dagger | Qureg[13]
+CX | ( Qureg[1], Qureg[13] )
+T | Qureg[13]
+H | Qureg[13]
+Deallocate | Qureg[13]
+T | Qureg[1]
+H | Qureg[1]
+CX | ( Qureg[0], Qureg[1] )
+T | Qureg[0]
+T^\dagger | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[4], Qureg[0] )
+T | Qureg[1]
+T^\dagger | Qureg[0]
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[0], Qureg[1] )
+T^\dagger | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+T | Qureg[4]
+Allocate | Qureg[14]
+H | Qureg[14]
+T | Qureg[1]
+CX | ( Qureg[4], Qureg[0] )
+X | Qureg[4]
+CX | ( Qureg[4], Qureg[0] )
+H | Qureg[1]
+CX | ( Qureg[0], Qureg[14] )
+T | Qureg[0]
+T^\dagger | Qureg[14]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[1], Qureg[14] )
+T | Qureg[14]
+T | Qureg[2]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[14] )
+T^\dagger | Qureg[14]
+Allocate | Qureg[15]
+H | Qureg[15]
+CX | ( Qureg[1], Qureg[14] )
+H | Qureg[2]
+CX | ( Qureg[4], Qureg[2] )
+T | Qureg[14]
+CX | ( Qureg[2], Qureg[15] )
+T | Qureg[2]
+T^\dagger | Qureg[15]
+H | Qureg[14]
+CX | ( Qureg[14], Qureg[15] )
+T | Qureg[15]
+CX | ( Qureg[14], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[14], Qureg[2] )
+CX | ( Qureg[2], Qureg[15] )
+T^\dagger | Qureg[15]
+T | Qureg[3]
+CX | ( Qureg[14], Qureg[15] )
+T | Qureg[15]
+CX | ( Qureg[4], Qureg[3] )
+T | Qureg[4]
+T^\dagger | Qureg[3]
+H | Qureg[15]
+CX | ( Qureg[15], Qureg[3] )
+CX | ( Qureg[15], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[15], Qureg[4] )
+T | Qureg[3]
+CX | ( Qureg[4], Qureg[3] )
+T^\dagger | Qureg[3]
+CX | ( Qureg[15], Qureg[3] )
+T | Qureg[15]
+H | Qureg[15]
+CX | ( Qureg[2], Qureg[15] )
+T | Qureg[2]
+T^\dagger | Qureg[15]
+T | Qureg[14]
+CX | ( Qureg[14], Qureg[15] )
+CX | ( Qureg[14], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[14], Qureg[2] )
+T | Qureg[15]
+CX | ( Qureg[2], Qureg[15] )
+T^\dagger | Qureg[15]
+CX | ( Qureg[14], Qureg[15] )
+T | Qureg[14]
+H | Qureg[14]
+CX | ( Qureg[0], Qureg[14] )
+T | Qureg[0]
+T^\dagger | Qureg[14]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[14] )
+T | Qureg[14]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[14] )
+T^\dagger | Qureg[14]
+CX | ( Qureg[1], Qureg[14] )
+T | Qureg[14]
+H | Qureg[14]
+Deallocate | Qureg[14]
+T | Qureg[15]
+H | Qureg[15]
+Deallocate | Qureg[15]
+CX | ( Qureg[4], Qureg[0] )
+Allocate | Qureg[16]
+H | Qureg[16]
+T | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[4], Qureg[2] )
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[0], Qureg[16] )
+T | Qureg[0]
+T^\dagger | Qureg[16]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[1], Qureg[16] )
+T | Qureg[16]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[16] )
+T^\dagger | Qureg[16]
+H | Qureg[2]
+CX | ( Qureg[1], Qureg[16] )
+T | Qureg[16]
+CX | ( Qureg[4], Qureg[2] )
+T | Qureg[4]
+T^\dagger | Qureg[2]
+H | Qureg[16]
+CX | ( Qureg[16], Qureg[2] )
+CX | ( Qureg[16], Qureg[4] )
+T^\dagger | Qureg[4]
+CX | ( Qureg[16], Qureg[4] )
+T | Qureg[2]
+CX | ( Qureg[4], Qureg[2] )
+T^\dagger | Qureg[2]
+CX | ( Qureg[16], Qureg[2] )
+T | Qureg[16]
+H | Qureg[16]
+CX | ( Qureg[0], Qureg[16] )
+T | Qureg[0]
+T^\dagger | Qureg[16]
+T | Qureg[1]
+CX | ( Qureg[1], Qureg[16] )
+T | Qureg[16]
+CX | ( Qureg[1], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[1], Qureg[0] )
+CX | ( Qureg[0], Qureg[16] )
+T^\dagger | Qureg[16]
+CX | ( Qureg[1], Qureg[16] )
+T | Qureg[16]
+H | Qureg[16]
+Deallocate | Qureg[16]
+T | Qureg[1]
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[4], Qureg[1] )
+H | Qureg[1]
+CX | ( Qureg[4], Qureg[0] )
+CX | ( Qureg[0], Qureg[1] )
+T | Qureg[0]
+T^\dagger | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+CX | ( Qureg[4], Qureg[0] )
+T^\dagger | Qureg[0]
+CX | ( Qureg[4], Qureg[0] )
+T | Qureg[1]
+CX | ( Qureg[0], Qureg[1] )
+Measure | Qureg[0]
+Input measurement result (0 or 1) for qubit 0: T^\dagger | Qureg[1]
+CX | ( Qureg[4], Qureg[1] )
+T | Qureg[1]
+H | Qureg[1]
+Measure | Qureg[1]
+Input measurement result (0 or 1) for qubit 1: T | Qureg[2]
+H | Qureg[2]
+Measure | Qureg[2]
+Input measurement result (0 or 1) for qubit 2: T | Qureg[3]
+H | Qureg[3]
+Measure | Qureg[3]
+Input measurement result (0 or 1) for qubit 3: T | Qureg[4]
+X | Qureg[4]
+Measure | Qureg[4]
+Input measurement result (0 or 1) for qubit 4: Deallocate | Qureg[3]
+Deallocate | Qureg[2]
+Deallocate | Qureg[1]
+Deallocate | Qureg[0]
+Deallocate | Qureg[4]
