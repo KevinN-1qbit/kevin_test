@@ -1,8 +1,8 @@
 #include "LysCompiler.hpp"
 #include <bitset>
-using namespace std;
 #include <stdexcept>
 #include <cmath>
+using namespace std;
 
 
 // helper functions to print the content

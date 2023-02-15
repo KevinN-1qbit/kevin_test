@@ -1,0 +1,12 @@
+# Secrets must be defined in .env file (see README)
+version: '3.7'
+services:
+  vr_node:
+    platform: linux/amd64
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: hansa
+    volumes:
+      - ./Trillium:/usr/src/app/Trillium
+    restart: always

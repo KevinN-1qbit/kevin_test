@@ -44,7 +44,7 @@ public:
       *
       * @param encoded_circuit Target encoded circuit as a vector of Gates (Rotations and Measures).
       */
-     LysCompiler(std::vector<shared_ptr<Operation>> encoded_circuit);
+     LysCompiler(std::vector<std::shared_ptr<Operation>> encoded_circuit);
 
      /**
       * @brief Construct a new Lys Compiler object
