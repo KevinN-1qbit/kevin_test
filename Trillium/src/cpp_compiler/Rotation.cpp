@@ -40,6 +40,12 @@ Rotation::Rotation(int angle, vector<char> basis, vector<int> qubits){
     this->zBasis = bitset<numQubits>(zBasisInteger);
 }
 
+Rotation::Rotation(int angle, string xBasis, string zBasis){
+    this->angle = angle;
+    this->xBasis = bitset<numQubits>(xBasis);
+    this->zBasis = bitset<numQubits>(zBasis);
+}
+
 
 bool Rotation::operator==(Rotation const& rotation) const {
     return (this->xBasis == rotation.xBasis && this->zBasis == rotation.zBasis && this->angle == rotation.angle) || (this->isIdentity() && rotation.isIdentity());
