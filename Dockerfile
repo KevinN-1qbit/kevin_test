@@ -29,10 +29,6 @@ RUN apt-get update && apt-get install -y \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz && \
-    tar xvf boost_1_80_0.tar.gz && cd boost_1_80_0 && \
-    ./bootstrap.sh --prefix=/usr/ && ./b2 install
-
 WORKDIR ${HOME_DIR}
 
 COPY . .
