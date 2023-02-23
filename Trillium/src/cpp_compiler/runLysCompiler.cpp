@@ -112,10 +112,10 @@ py::tuple run_lys_with_mea(vector<Rotation> rotations, vector<int> roIndex, vect
 py::tuple run_lys_default_mea(int numDefaultMeasurements, vector<Rotation> rotations, bool combine) {
     // the circuit has no measurement and we append a default measurement at the end 
 //    std::vector<Gate> gates(rotations.size());
-    std::vector<std::shared_ptr<Operation>> gates(rotations.size());
+    std::vector<std::shared_ptr<Operation>> gates;
 //    for (int i=0; i< rotations.size(); i++) gates[i] = rotations[i];
     for (int i=0; i< rotations.size(); i++){
-        gates.emplace_back(make_shared<Rotation>(rotations[i]));
+        gates.emplace_back(std::make_shared<Rotation>(rotations[i]));
     }
 
     LysCompiler compiler = LysCompiler(numDefaultMeasurements, move(gates));
