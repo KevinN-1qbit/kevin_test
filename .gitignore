@@ -4,3 +4,6 @@ Trillium/src/cpp_compiler/CMakeFiles/
 Trillium/src/cpp_compiler/CTestTestfile.cmake
 Trillium/src/cpp_compiler/cmake_install.cmake
 Trillium/src/cpp_compiler/runLysCompiler.so
+
+
+Lys.egg-info/
