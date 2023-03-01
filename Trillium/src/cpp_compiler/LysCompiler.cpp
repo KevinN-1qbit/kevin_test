@@ -977,7 +977,7 @@ int LysCompiler::basis_permutation(int numOfTGates) {
 }
 
 
-pair<vector<vector<Operation>>,int> LysCompiler::runLysCompiler(bool combine, bool layer){
+pair<vector<vector<shared_ptr<Operation>>>,int> LysCompiler::runLysCompiler(bool combine, bool layer){
     //reduce gate count
     // std::pair<std::vector<Gate>, std::vector<Gate>> tAndNonT = this->optimizeRotation();
     auto startTime1 = chrono::system_clock::now();
@@ -992,7 +992,7 @@ pair<vector<vector<Operation>>,int> LysCompiler::runLysCompiler(bool combine, bo
         startingIdxToRemoveAfterMeasure = this->circuit.size() - numOfCommutedCliffords; // update the startingIdxToRemoveAfterMeasure to include the T gates inserted
     }
 
-    vector<vector<Operation>> layerC ;
+    vector<vector<shared_ptr<Operation>>> layerC ;
 
     auto endTime1 = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds1 = endTime1-startTime1;

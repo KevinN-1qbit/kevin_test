@@ -98,7 +98,7 @@ py::tuple run_lys_with_mea(vector<Rotation> rotations, vector<int> roIndex, vect
     }
 
     LysCompiler compiler = LysCompiler(move(gates));
-    pair<vector<vector<Operation> >, int> compilerResults_layered = compiler.runLysCompiler(combine, false);
+    pair<vector<vector<std::shared_ptr<Operation>> >, int> compilerResults_layered = compiler.runLysCompiler(combine, false);
     int startingIdxToRemoveAfterMeasure   = compilerResults_layered.second; // if layer==false, we only care about startingIdxToRemoveAfterMeasure, the "compilerResults_layered" itself will be empty 
     vector<shared_ptr<Operation>> compiledVec;                           // vector that will hold the compiled circuit output
     compiledVec.insert(compiledVec.end(), compiler.circuit.begin(), compiler.circuit.begin() + startingIdxToRemoveAfterMeasure);
@@ -113,13 +113,14 @@ py::tuple run_lys_default_mea(int numDefaultMeasurements, vector<Rotation> rotat
     // the circuit has no measurement and we append a default measurement at the end 
 //    std::vector<Gate> gates(rotations.size());
     std::vector<std::shared_ptr<Operation>> gates;
+    gates.reserve(rotations.size());
 //    for (int i=0; i< rotations.size(); i++) gates[i] = rotations[i];
     for (int i=0; i< rotations.size(); i++){
         gates.emplace_back(std::make_shared<Rotation>(rotations[i]));
     }
 
     LysCompiler compiler = LysCompiler(numDefaultMeasurements, move(gates));
-    pair<vector<vector<Operation> >, int> compilerResults_layered = compiler.runLysCompiler(combine, false); // if layer==false, this will return an empty list
+    pair<vector<vector<std::shared_ptr<Operation>> >, int> compilerResults_layered = compiler.runLysCompiler(combine, false); // if layer==false, this will return an empty list
     int startingIdxToRemoveAfterMeasure   = compilerResults_layered.second; // if layer==false, we only care about startingIdxToRemoveAfterMeasure, the "compilerResults_layered" itself will be empty 
     vector<shared_ptr<Operation>> compiledVec;                           // vector that will hold the compiled circuit output
     compiledVec.insert(compiledVec.end(), compiler.circuit.begin(), compiler.circuit.begin() + startingIdxToRemoveAfterMeasure);
@@ -160,7 +161,7 @@ py::tuple run_lys_section(vector<vector<Rotation>> rotVecVec, vector<vector<int>
         // startingIdxToRemoveAfterMeasure: the index at which commuted cliffords begin; all gates from this index startingIdxToRemoveAfterMeasure (inclusive) to the end of the list,
         // will be inserted into the beginning of the next section, and not included in the current section's output
         LysCompiler compiler                            = LysCompiler(move(gateVecVec[i]), ancillaBegin);
-        pair<vector<vector<Operation>>, int> compilerResults = compiler.runLysCompiler(combine, false); // since layer=false, we only care about the int startingIdxToRemoveAfterMeasure; the vecvec will be empty
+        pair<vector<vector<std::shared_ptr<Operation>>>, int> compilerResults = compiler.runLysCompiler(combine, false); // since layer=false, we only care about the int startingIdxToRemoveAfterMeasure; the vecvec will be empty
         int startingIdxToRemoveAfterMeasure             = compilerResults.second;
 
         // Step 2

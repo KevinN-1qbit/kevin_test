@@ -337,7 +337,7 @@ public:
      *         int index at which the Cliffords (after the measures) start
      *
      */
-    std::pair<std::vector<std::vector<Operation>>,int> runLysCompiler(bool combine,bool layer);
+    std::pair<std::vector<std::vector<std::shared_ptr<Operation>>>,int> runLysCompiler(bool combine,bool layer);
 
 };
 
