@@ -2,7 +2,24 @@
 
 Source code for the Lys compiler. 
 
-# Getting started:
+# Getting started Docker:
+
+There is a docker image with all the required dependencies installed. You can run the compiler 
+in it by following the steps below:
+
+1. ```docker run -it quay.io/1qbit/hansa bash```
+
+2. Navigate to ```Trillium/src/cpp_compiler``` folder.
+
+3. Run ```cmake .``` followed by ```make``` 
+
+4. Navigate to ```/workspace``` and run ```pip install -e .```
+
+5. From here you should be able to run the Compilation by using the ```lys.py``` file
+
+This should produce an txt output file result in the ```data/output``` directory
+
+# Getting started Local Development:
 
 ## Prerequisites:
 Python 3.8 +

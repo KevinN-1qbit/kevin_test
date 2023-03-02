@@ -24,7 +24,7 @@ if (PYTHONINTERP_FOUND)
     else()
         message(FATAL_ERROR "Unable to find correct Python version. Minimum required version is Python 3")
     endif()
-  else()	
+  else()    
     if (PYTHON_VERSION_MAJOR EQUAL 3)
         FIND_PACKAGE(Boost COMPONENTS python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
         FIND_PACKAGE(PythonInterp 3)
@@ -53,5 +53,3 @@ python_add_module(runLysCompiler runLysCompiler.cpp)
 #target_compile_options(runLysCompiler PUBLIC "-Wno-dev") # attempt to suppress warnings
 target_include_directories(runLysCompiler PUBLIC ${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 target_link_libraries(runLysCompiler ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
-
-

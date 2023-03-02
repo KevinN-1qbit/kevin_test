@@ -153,7 +153,7 @@ def main(cfg: dict) -> None:
           "Result has been written to directory: data/output")
 
 
-def get_parser_and_circuit_input(cfg: dict) -> tuple[type(parse.Parse), str]:
+def get_parser_and_circuit_input(cfg: dict):
     parser_dict = {"qasm": parse.ParseQasm, "projectq": parse.ParseProjectQ}
     chosen_parser = parser_dict[cfg["language"]]
     circuit_input: str = cfg["input_file"]

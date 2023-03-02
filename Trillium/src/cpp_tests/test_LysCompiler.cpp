@@ -1,6 +1,8 @@
 #include "../cpp_compiler/LysCompiler.hpp"
 #include <vector>
 #include <iostream>
+#include "../cpp_compiler/Operation.hpp"
+
 
 using namespace std;
 
@@ -11,12 +13,17 @@ int Test_defaultInitiatization()
 
     Rotation XIII = Rotation(1,x,{0});
     
-    vector<Gate> flatten_gate(5,XIII);
+    vector<shared_ptr<Operation>> flatten_gate(5,std::make_shared<Operation>(XIII));
     LysCompiler gatelist = LysCompiler(3,flatten_gate);
-    vector<Gate> expected_measure = {Measure(true,z,{0}),Measure(true,z,{1}),Measure(true,z,{2})};
-    if(expected_measure!=vector<Gate>(gatelist.circuit.begin()+5,gatelist.circuit.end())){
-        toStrVariantVec(gatelist.circuit) ;
-        toStrVariantVec(expected_measure) ;
+
+    vector<shared_ptr<Operation>> expected_measure = {  
+        std::make_shared<Measure>(Measure(true,z,{0})),
+        std::make_shared<Measure>(Measure(true,z,{1})),
+        std::make_shared<Measure>(Measure(true,z,{2}))
+    };
+    if(expected_measure!=vector<shared_ptr<Operation>>(gatelist.circuit.begin()+5,gatelist.circuit.end())){
+        //toStrVariantVec(gatelist.circuit) ;
+        //toStrVariantVec(expected_measure) ;
         cout << "defaultInitialization failed\n";
         
         return 1;
@@ -81,18 +88,20 @@ int Test_combineRotation(LysCompiler gatelist)
     return 0;
 }
 
+
 int Test_implementNoOrderingRotationCombination(LysCompiler gatelist){
 
     vector<char> emptyc = {};
     vector<char> z = {'z'};
-    Rotation III     = Rotation(0,emptyc,{});
-    Rotation IZI     = Rotation(0,z,{1});
-    Rotation YXZpi8  = Rotation(1,vector<char>{'y','x','z'},{0,1,2});
-    Rotation YXZmpi4 = Rotation(-2,vector<char>{'y','x','z'},{0,1,2});
-    Rotation YXZ     = Rotation(0,vector<char>{'y','x','z'},{0,1,2});
-    Rotation YXZmpi8 = Rotation(-1,vector<char>{'y','x','z'},{0,1,2});
 
-    vector< vector<Gate>> cases = {
+    std::shared_ptr<Operation> III       = std::make_shared<Operation>(Rotation(0,emptyc,{}));
+    std::shared_ptr<Operation> IZI       = std::make_shared<Operation>(Rotation(0,z,{1}));
+    std::shared_ptr<Operation> YXZpi8    = std::make_shared<Operation>(Rotation(1,vector<char>{'y','x','z'},{0,1,2}));
+    std::shared_ptr<Operation> YXZmpi4   = std::make_shared<Operation>(Rotation(-2,vector<char>{'y','x','z'},{0,1,2}));
+    std::shared_ptr<Operation> YXZ       = std::make_shared<Operation>(Rotation(0,vector<char>{'y','x','z'},{0,1,2}));
+    std::shared_ptr<Operation> YXZmpi8   = std::make_shared<Operation>(Rotation(-1,vector<char>{'y','x','z'},{0,1,2}));
+
+    vector< vector<shared_ptr<Operation>>> cases = {
         {III},
         {III,IZI},
         {YXZpi8,YXZmpi4,YXZ},
@@ -101,7 +110,7 @@ int Test_implementNoOrderingRotationCombination(LysCompiler gatelist){
         {YXZ,YXZpi8,IZI},
         {YXZpi8,YXZpi8,IZI,YXZmpi4,YXZmpi8,YXZpi8}
     };
-    vector< vector<Gate>> expected_results = {
+    vector< vector<shared_ptr<Operation>>> expected_results = {
         {}, 
         {IZI}, 
         {YXZmpi8, YXZ}, 
@@ -126,20 +135,21 @@ int Test_implementNoOrderingRotationCombination(LysCompiler gatelist){
     return 0;
 }
 
+
 int Test_noOrderingRotationCombination(LysCompiler gatelist){
 
     vector<char> emptyc = {};
-    Rotation III     = Rotation(0,emptyc,{});
-    Rotation YXZpi8  = Rotation(1,vector<char>{'y','x','z'},{0,1,2});
-    Rotation YXZpi4  = Rotation(2,vector<char>{'y','x','z'},{0,1,2});
-    Rotation YXZ     = Rotation(0,vector<char>{'y','x','z'},{0,1,2});
-    Rotation YXZmpi8 = Rotation(-1,vector<char>{'y','x','z'},{0,1,2});
+    std::shared_ptr<Operation> III       = std::make_shared<Operation>(Rotation(0,emptyc,{}));
+    std::shared_ptr<Operation> YXZpi8    = std::make_shared<Operation>(Rotation(1,vector<char>{'y','x','z'},{0,1,2}));
+    std::shared_ptr<Operation> YXZpi4    = std::make_shared<Operation>(Rotation(2,vector<char>{'y','x','z'},{0,1,2}));
+    std::shared_ptr<Operation> YXZ       = std::make_shared<Operation>(Rotation(0,vector<char>{'y','x','z'},{0,1,2}));
+    std::shared_ptr<Operation> YXZmpi8   = std::make_shared<Operation>(Rotation(-1,vector<char>{'y','x','z'},{0,1,2}));
     
-    vector< vector<Gate>> cases = {
+    vector< vector<shared_ptr<Operation>>> cases = {
         {YXZ,YXZpi8,YXZpi8,YXZpi4,III},
         {YXZ,YXZpi4,YXZpi8,YXZpi4,YXZmpi8,YXZmpi8}
     };
-    vector< vector<Gate>> expected_result = {
+    vector< vector<shared_ptr<Operation>>> expected_result = {
         {}, 
         {YXZmpi8} 
     };
@@ -217,8 +227,8 @@ int Test_pushTForwardThread(LysCompiler gatelist)
     vector<char> x = {'x'};
     vector<char> z = {'z'};
     vector<char> y = {'y'};
-    vector<Gate> flatten_gates ;
-    vector<Gate> expected_forward_pushed_gates ;
+    vector<shared_ptr<Operation>> flatten_gates ;
+    vector<shared_ptr<Operation>> expected_forward_pushed_gates ;
     vector<int> zero = {0};
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
     if (flatten_gates!=expected_forward_pushed_gates) {
@@ -227,8 +237,8 @@ int Test_pushTForwardThread(LysCompiler gatelist)
     } 
     
     //Single tgate.
-    flatten_gates = { Rotation(1,x,{0}) };
-    expected_forward_pushed_gates = { Rotation(1,x,{0}) };
+    flatten_gates = { std::make_shared<Operation>(Rotation(1,x,{0})) };
+    expected_forward_pushed_gates = { std::make_shared<Operation>(Rotation(1,x,{0})) };
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
     if (flatten_gates!=expected_forward_pushed_gates) {
         cout << "pushTForwardThread case single tgate failed\n" ;
@@ -236,27 +246,27 @@ int Test_pushTForwardThread(LysCompiler gatelist)
     }
 
     // Single non-tgate.
-    flatten_gates = { Rotation(0,vector<char>{'z','x'},{0,1}) };
-    expected_forward_pushed_gates = { Rotation(0,vector<char>{'z','x'},{0,1}) };
+    flatten_gates = { std::make_shared<Operation>(Rotation(0,vector<char>{'z','x'},{0,1})) };
+    expected_forward_pushed_gates = { std::make_shared<Operation>(Rotation(0,vector<char>{'z','x'},{0,1}))  };
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
     if (flatten_gates!=expected_forward_pushed_gates) {
         cout << "pushTForwardThread case single non-tgate failed\n" ;
         return 1;
     }
     // All tgates.
-    flatten_gates = { Rotation(1,x,{0}),
-                      Rotation(-1,x,{2}),
-                      Rotation(-1,vector<char>{'z','x'},{1,0}),
-                      Rotation(1,vector<char>{'z','x'},{1,0}),
-                      Rotation(-1,x,{2}),
-                      Rotation(1,z,{2}) 
+    flatten_gates = { std::make_shared<Operation>(Rotation(1,x,{0})),
+                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                      std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(1,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                      std::make_shared<Operation>(Rotation(1,z,{2})) 
                     };
-    expected_forward_pushed_gates = { Rotation(1,x,{0}),
-                                      Rotation(-1,x,{2}),
-                                      Rotation(-1,vector<char>{'z','x'},{1,0}),
-                                      Rotation(1,vector<char>{'z','x'},{1,0}),
-                                      Rotation(-1,x,{2}),
-                                      Rotation(1,z,{2}) 
+    expected_forward_pushed_gates = { std::make_shared<Operation>(Rotation(1,x,{0})),
+                                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                                      std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(1,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                                      std::make_shared<Operation>(Rotation(1,z,{2})) 
                                     };
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
     if (flatten_gates!=expected_forward_pushed_gates) {
@@ -264,25 +274,25 @@ int Test_pushTForwardThread(LysCompiler gatelist)
         return 1;
     }
     //Single tgate vs many non-tgate.
-    flatten_gates = { Rotation(0,vector<char>{'z','x'},{0,1}),
-                      Rotation(0,x,{0}),
-                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                      Rotation(-2,z,{1}),
-                      Rotation(-2,x,{0}),
-                      Rotation(2,z,{1}),
-                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                      Rotation(2,x,{2}),
-                      Rotation(1,z,{2}) 
+    flatten_gates = { std::make_shared<Operation>(Rotation(0,vector<char>{'z','x'},{0,1})),
+                      std::make_shared<Operation>(Rotation(0,x,{0})),
+                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(-2,z,{1})),
+                      std::make_shared<Operation>(Rotation(-2,x,{0})),
+                      std::make_shared<Operation>(Rotation(2,z,{1})),
+                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(2,x,{2})),
+                      std::make_shared<Operation>(Rotation(1,z,{2})) 
                     };
-    expected_forward_pushed_gates = { Rotation(-1,y,{2}),
-                                      Rotation(0,vector<char>{'z','x'},{0,1}),
-                                      Rotation(0,x,{0}),
-                                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                                      Rotation(-2,z,{1}),
-                                      Rotation(-2,x,{0}),
-                                      Rotation(2,z,{1}),
-                                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                                      Rotation(2,x,{2}) 
+    expected_forward_pushed_gates = { std::make_shared<Operation>(Rotation(-1,y,{2})),
+                                      std::make_shared<Operation>(Rotation(0,vector<char>{'z','x'},{0,1})),
+                                      std::make_shared<Operation>(Rotation(0,x,{0})),
+                                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(-2,z,{1})),
+                                      std::make_shared<Operation>(Rotation(-2,x,{0})),
+                                      std::make_shared<Operation>(Rotation(2,z,{1})),
+                                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(2,x,{2})) 
                                     };
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
     if (flatten_gates!=expected_forward_pushed_gates) {
@@ -290,35 +300,35 @@ int Test_pushTForwardThread(LysCompiler gatelist)
         return 1;
     }
     // An overall test.
-    flatten_gates = { Rotation(0,vector<char>{'z','x'},{0,1}),
-                      Rotation(1,x,{0}),
-                      Rotation(0,x,{0}),
-                      Rotation(-1,x,{2}),
-                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                      Rotation(-2,z,{1}),
-                      Rotation(-1,vector<char>{'z','x'},{1,0}),
-                      Rotation(1,vector<char>{'z','x'},{1,0}),
-                      Rotation(-2,x,{0}),
-                      Rotation(-1,x,{2}),
-                      Rotation(2,z,{1}),
-                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                      Rotation(2,x,{2}),
-                      Rotation(1,z,{2})
+    flatten_gates = { std::make_shared<Operation>(Rotation(0,vector<char>{'z','x'},{0,1})),
+                      std::make_shared<Operation>(Rotation(1,x,{0})),
+                      std::make_shared<Operation>(Rotation(0,x,{0})),
+                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(-2,z,{1})),
+                      std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(1,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(-2,x,{0})),
+                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                      std::make_shared<Operation>(Rotation(2,z,{1})),
+                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                      std::make_shared<Operation>(Rotation(2,x,{2})),
+                      std::make_shared<Operation>(Rotation(1,z,{2}))
                     };
-    expected_forward_pushed_gates = { Rotation(-1,x,{0}),
-                                      Rotation(-1,x,{2}),
-                                      Rotation(-1,vector<char>{'z','x'},{1,0}),
-                                      Rotation(1,vector<char>{'z','x'},{1,0}),
-                                      Rotation(-1,x,{2}),
-                                      Rotation(-1,y,{2}),
-                                      Rotation(0,vector<char>{'z','x'},{0,1}),
-                                      Rotation(0,x,{0}),
-                                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                                      Rotation(-2,z,{1}),
-                                      Rotation(-2,x,{0}),
-                                      Rotation(2,z,{1}),
-                                      Rotation(2,vector<char>{'z','x'},{1,0}),
-                                      Rotation(2,x,{2})
+    expected_forward_pushed_gates = { std::make_shared<Operation>(Rotation(-1,x,{0})),
+                                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                                      std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(1,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(-1,x,{2})),
+                                      std::make_shared<Operation>(Rotation(-1,y,{2})),
+                                      std::make_shared<Operation>(Rotation(0,vector<char>{'z','x'},{0,1})),
+                                      std::make_shared<Operation>(Rotation(0,x,{0})),
+                                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(-2,z,{1})),
+                                      std::make_shared<Operation>(Rotation(-2,x,{0})),
+                                      std::make_shared<Operation>(Rotation(2,z,{1})),
+                                      std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,0})),
+                                      std::make_shared<Operation>(Rotation(2,x,{2}))
                                     };
 
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
@@ -329,16 +339,16 @@ int Test_pushTForwardThread(LysCompiler gatelist)
 
     //Measure and Rotation that commute
     flatten_gates = {
-        Measure(true,z,{1}),
-        Rotation(-1,x,{0})
+        std::make_shared<Operation>(Measure(true,z,{1})),
+        std::make_shared<Operation>(Rotation(-1,x,{0}))
     };
     expected_forward_pushed_gates = {
-        Rotation(-1,x,{0}),
-        Measure(true,z,{1})
+        std::make_shared<Operation>(Rotation(-1,x,{0})),
+        std::make_shared<Operation>(Measure(true,z,{1}))
     };
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
     if (flatten_gates!=expected_forward_pushed_gates) {  
-        toStrVariantVec(flatten_gates);
+        //toStrVariantVec(flatten_gates);
         cout << "pushTForwardThread case Measure and Rotation that commute test failed\n" ;
         return 1;
     }
@@ -348,18 +358,19 @@ int Test_pushTForwardThread(LysCompiler gatelist)
 }
 
 
+
 int Test_reduceLayerGreedyAlgo(LysCompiler gatelist){
 
     vector<char> x = {'x'};
     vector<char> z = {'z'};
     vector<char> y = {'y'};
 
-    vector<Gate> used_gates = { //tgates
-                   Rotation(1,x,{0}),
-                   Rotation(-1,x,{2}),
-                   Rotation(-1,vector<char>{'z','x'},{1,0}), 
-                   Rotation(1,vector<char>{'z','x'},{1,0}), 
-                   Rotation(1,z,{2}),
+    vector<shared_ptr<Operation>> used_gates = { //tgates
+                   std::make_shared<Operation>(Rotation(1,x,{0})),
+                   std::make_shared<Operation>(Rotation(-1,x,{2})),
+                   std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{1,0})), 
+                   std::make_shared<Operation>(Rotation(1,vector<char>{'z','x'},{1,0})), 
+                   std::make_shared<Operation>(Rotation(1,z,{2})),
                  };
 
     // For information on the test, you can uncomment this code to see which gates commute with which. 
@@ -374,9 +385,9 @@ int Test_reduceLayerGreedyAlgo(LysCompiler gatelist){
 
             
     // Empty list of gates.
-    vector<Gate> flatten_gates = {};
-    vector< vector<Gate>> expected_greedy_reduced_gates = {};
-    vector< vector<Gate>> greedy_reduced_gates = gatelist.reduceLayerGreedyAlgo(flatten_gates);
+    vector<shared_ptr<Operation>> flatten_gates = {};
+    vector< vector<shared_ptr<Operation>>> expected_greedy_reduced_gates = {};
+    vector< vector<shared_ptr<Operation>>> greedy_reduced_gates = gatelist.reduceLayerGreedyAlgo(flatten_gates);
     if (greedy_reduced_gates!=expected_greedy_reduced_gates) {
         cout << " greedy case empty list of gates failed\n" ;
         return 1;
@@ -410,9 +421,9 @@ int Test_reduceLayerGreedyAlgo(LysCompiler gatelist){
                                     };
     greedy_reduced_gates = gatelist.reduceLayerGreedyAlgo(flatten_gates);
     if (greedy_reduced_gates!=expected_greedy_reduced_gates) {
-        for(vector<Gate> vG:greedy_reduced_gates){
+        for(vector<shared_ptr<Operation>> vG:greedy_reduced_gates){
             cout << " ---- layer ---- \n"; 
-            toStrVariantVec(vG);
+            //toStrVariantVec(vG);
         }
         cout << " greedy case Two commutable gates failed\n" ;
         return 1;
@@ -504,8 +515,8 @@ int Test_reduceLayerGreedyAlgo(LysCompiler gatelist){
     }
 
     // Dummy 200 gates
-    vector<Gate> flatten_gate(200,used_gates[0]);
-    expected_greedy_reduced_gates = { vector<Gate>(200,used_gates[0])
+    vector<shared_ptr<Operation>> flatten_gate(200,used_gates[0]);
+    expected_greedy_reduced_gates = { vector<shared_ptr<Operation>>(200,used_gates[0])
                                     };
     greedy_reduced_gates = gatelist.reduceLayerGreedyAlgo(flatten_gate);
     if (greedy_reduced_gates!=expected_greedy_reduced_gates) {
@@ -527,16 +538,16 @@ int Test_optimizeRotation(){
     Rotation XIIIpi2 = Rotation(2,x,{0});
     
     // Dummy 200 gates
-    vector<Gate> flatten_gate(200,XIII);
+    vector<shared_ptr<Operation>> flatten_gate(200,std::make_shared<Operation>(XIII));
     LysCompiler gatelist = LysCompiler(flatten_gate);
-    vector<Gate> expected_circuit;
+    vector<shared_ptr<Operation>> expected_circuit;
     gatelist.optimizeRotation();
     if (gatelist.circuit!=expected_circuit ) {
         cout << "optimizedRotation case dummy 200 gates failed\n" ;
         return 1;
     }
 
-    vector<Gate> flatten_gate0(8,XIII);
+    vector<shared_ptr<Operation>> flatten_gate0(8,std::make_shared<Operation>(XIII));
     gatelist = LysCompiler(flatten_gate0);
     gatelist.optimizeRotation();
     if (gatelist.circuit!=expected_circuit){
@@ -545,7 +556,7 @@ int Test_optimizeRotation(){
     }
 
 
-    vector<Gate> flatten_gate2(208,XIII);
+    vector<shared_ptr<Operation>> flatten_gate2(208,std::make_shared<Operation>(XIII));
     gatelist = LysCompiler(flatten_gate2);
     gatelist.optimizeRotation();
     if (gatelist.circuit!=expected_circuit ) {
@@ -553,7 +564,7 @@ int Test_optimizeRotation(){
         return 1;
     }
 
-    vector<Gate> flatten_gate1(200,XIIIpi2);
+    vector<shared_ptr<Operation>> flatten_gate1(200,std::make_shared<Operation>(XIIIpi2));
     gatelist = LysCompiler(flatten_gate1);
     gatelist.optimizeRotation();
     if (gatelist.circuit!=expected_circuit){
@@ -572,13 +583,14 @@ int Test_rearrange_clifford_gates(LysCompiler gatelist){
     vector<char> x = {'x'};
     vector<char> z = {'z'};
     vector<char> y = {'y'};
-    Rotation XI  = Rotation(0,x,{0});
-    Rotation ZI  = Rotation(0,z,{0});
-    Rotation XY  = Rotation(0,vector<char>{'x','y'},{0,1}); 
-    Rotation IZ  = Rotation(0,z,{1});
-    Rotation ZZ  = Rotation(0,vector<char>{'z','z'},{0,1}); 
 
-    vector<vector< Gate> > cases = {
+    std::shared_ptr<Operation> XI  = std::make_shared<Operation>(Rotation(0,x,{0}));
+    std::shared_ptr<Operation> ZI  = std::make_shared<Operation>(Rotation(0,z,{0}));
+    std::shared_ptr<Operation> XY  = std::make_shared<Operation>(Rotation(0,vector<char>{'x','y'},{0,1})); 
+    std::shared_ptr<Operation> IZ  = std::make_shared<Operation>(Rotation(0,z,{1}));
+    std::shared_ptr<Operation> ZZ  = std::make_shared<Operation>(Rotation(0,vector<char>{'z','z'},{0,1})); 
+
+    vector<vector<shared_ptr<Operation>>> cases = {
         {XI,XY,ZI,ZZ,IZ},
         {IZ,ZI,ZZ,ZZ,ZI,ZI,IZ,ZZ},
         {XI,XY,ZI,ZZ,IZ,XI},
@@ -587,13 +599,14 @@ int Test_rearrange_clifford_gates(LysCompiler gatelist){
     };
 
     vector<int> expected_index  = {3, 3, 3, 0, 1};
-    vector<vector<Gate> > expected_result = {
+    vector<vector<shared_ptr<Operation>>> expected_result = {
         {XY,XI,ZZ,ZI,IZ},
         {ZZ,ZZ,ZZ,IZ,ZI,ZI,ZI,IZ},
         {XY,XI,ZZ,ZI,IZ,XI},
         {},
         {ZZ}    
     };
+
     vector<int> index_1qbit ;
     for( int idxCase = 0 ; idxCase < cases.size() ; idxCase++){
         gatelist.circuit = cases[idxCase] ; 
@@ -612,6 +625,7 @@ int Test_rearrange_clifford_gates(LysCompiler gatelist){
     cout << "RearrangeCliffordGates passed\n" ;
     return 0;
 }
+
 
 int Test_applyCommutationRM(LysCompiler gatelist){
     vector<char> x = {'x'};
@@ -656,50 +670,53 @@ int Test_applyCommutationRM(LysCompiler gatelist){
 
 }
 
-
 int Test_basis_permutation(LysCompiler gatelist){
     vector<char> x = {'x'};
     vector<char> z = {'z'};
     vector<char> y = {'y'};
-    Rotation XI      = Rotation(0,x,{0});
-    Rotation ZI      = Rotation(0,z,{0});
-    Rotation XY      = Rotation(0,vector<char>{'x','y'},{0,1}); 
-    Rotation IZ      = Rotation(0,z,{1});
-    Rotation ZZ      = Rotation(0,vector<char>{'z','z'},{0,1}); 
-    Measure MIZ     = Measure(true,z,{1});
-    Measure MZI     = Measure(true,z,{0});
- 
-    Rotation IXZI4   = Rotation(2,vector<char>{'x','z'},{1,2});
-    Rotation IIIXm4  = Rotation(-2,x,{3});
-    Rotation IXIIm4  = Rotation(-2,x,{1});
-    Rotation IIZIm4  = Rotation(-2,z,{2});
-    Rotation XZII4   = Rotation(2,vector<char>{'x','z'},{0,1});
-    Rotation IIXI4   = Rotation(2,x,{2});
-    Rotation XIIIm4  = Rotation(-2,x,{0});
-    Rotation IZIIm4  = Rotation(-2,z,{1});
-    Rotation XIIZ4   = Rotation(2,vector<char>{'x','z'},{0,3});
-    Rotation IIIZm4  = Rotation(-2,z,{3});
-    Rotation IZII4   = Rotation(2,z,{1});
-    Rotation IIIZ4   = Rotation(2,z,{3});
-    Rotation IXII4   = Rotation(2,x,{1});
-    Rotation IIIX4   = Rotation(2,x,{3});
-    Measure MZIII   = Measure(true,z,{0});
-    Measure MIZII   = Measure(true,z,{1});
-    Measure MIIZI   = Measure(true,z,{2});
-    Measure MIIIZ   = Measure(true,z,{3});
-    Measure MYZZY   = Measure(true,vector<char>{'y','z','z','y'},{0,1,2,3});
-    Measure MXXII   = Measure(true,vector<char>{'x','x'},{0,1});
-    Measure MIIZIm  = Measure(false,z,{2});
-    Measure MXIIX   = Measure(true,vector<char>{'x','x'},{0,3});
 
-    vector< vector<Gate> > cases = {
+    std::shared_ptr<Operation> XI      = std::make_shared<Operation>(Rotation(0,x,{0}));
+    std::shared_ptr<Operation> ZI      = std::make_shared<Operation>(Rotation(0,z,{0}));
+    std::shared_ptr<Operation> XY      = std::make_shared<Operation>(Rotation(0,vector<char>{'x','y'},{0,1})); 
+    std::shared_ptr<Operation> IZ      = std::make_shared<Operation>(Rotation(0,z,{1}));
+    std::shared_ptr<Operation> ZZ      = std::make_shared<Operation>(Rotation(0,vector<char>{'z','z'},{0,1})); 
+    std::shared_ptr<Operation> MIZ     = std::make_shared<Operation>(Measure(true,z,{1}));
+    std::shared_ptr<Operation> MZI     = std::make_shared<Operation>(Measure(true,z,{0}));
+ 
+    std::shared_ptr<Operation> IXZI4   = std::make_shared<Operation>(Rotation(2,vector<char>{'x','z'},{1,2}));
+    std::shared_ptr<Operation> IIIXm4  = std::make_shared<Operation>(Rotation(-2,x,{3}));
+    std::shared_ptr<Operation> IXIIm4  = std::make_shared<Operation>(Rotation(-2,x,{1}));
+    std::shared_ptr<Operation> IIZIm4  = std::make_shared<Operation>(Rotation(-2,z,{2}));
+    std::shared_ptr<Operation> XZII4   = std::make_shared<Operation>(Rotation(2,vector<char>{'x','z'},{0,1}));
+    std::shared_ptr<Operation> IIXI4   = std::make_shared<Operation>(Rotation(2,x,{2}));
+    std::shared_ptr<Operation> XIIIm4  = std::make_shared<Operation>(Rotation(-2,x,{0}));
+    std::shared_ptr<Operation> IZIIm4  = std::make_shared<Operation>(Rotation(-2,z,{1}));
+    std::shared_ptr<Operation> XIIZ4   = std::make_shared<Operation>(Rotation(2,vector<char>{'x','z'},{0,3}));
+    std::shared_ptr<Operation> IIIZm4  = std::make_shared<Operation>(Rotation(-2,z,{3}));
+    std::shared_ptr<Operation> IZII4   = std::make_shared<Operation>(Rotation(2,z,{1}));
+    std::shared_ptr<Operation> IIIZ4   = std::make_shared<Operation>(Rotation(2,z,{3}));
+    std::shared_ptr<Operation> IXII4   = std::make_shared<Operation>(Rotation(2,x,{1}));
+    std::shared_ptr<Operation> IIIX4   = std::make_shared<Operation>(Rotation(2,x,{3}));
+    std::shared_ptr<Operation> MZIII   = std::make_shared<Operation>(Measure(true,z,{0}));
+    std::shared_ptr<Operation> MIZII   = std::make_shared<Operation>(Measure(true,z,{1}));
+    std::shared_ptr<Operation> MIIZI   = std::make_shared<Operation>(Measure(true,z,{2}));
+    std::shared_ptr<Operation> MIIIZ   = std::make_shared<Operation>(Measure(true,z,{3}));
+    std::shared_ptr<Operation> MYZZY   = std::make_shared<Operation>(Measure(true,vector<char>{'y','z','z','y'},{0,1,2,3}));
+    std::shared_ptr<Operation> MXXII   = std::make_shared<Operation>(Measure(true,vector<char>{'x','x'},{0,1}));
+    std::shared_ptr<Operation> MIIZIm  = std::make_shared<Operation>(Measure(false,z,{2}));
+    std::shared_ptr<Operation> MXIIX   = std::make_shared<Operation>(Measure(true,vector<char>{'x','x'},{0,3}));
+
+    vector< vector<shared_ptr<Operation>> > cases = {
         {XI,XY,ZI,ZZ,IZ,MZI,MIZ},
         {IXZI4,IIIXm4,IXIIm4,IIZIm4,XZII4,IIXI4,XIIIm4,IZIIm4,XIIZ4,XIIIm4,IIIZm4,
           IZII4,IIIZ4,XIIIm4,IXII4,IIXI4,IIIX4,MZIII,MIZII,MIIZI,MIIIZ}
     };
     // Please note: the commuted over clifford are thrown out not by this function, but the runLysCompiler section processor
-    vector< vector<Gate>  > expected_cases = {
-        {Measure(true,z,{0}), Measure(false,z,{1}), XY, XI, ZZ, ZI, IZ},
+    vector< vector<shared_ptr<Operation>>  > expected_cases = {
+        {
+            std::make_shared<Measure>(Measure(true,z,{0})), 
+            std::make_shared<Measure>(Measure(false,z,{1})), XY, XI, ZZ, ZI, IZ
+        },
         {MYZZY,MXXII,MIIZIm,MXIIX, IXZI4, IXIIm4, XZII4,
         IIIXm4, XIIZ4, IIZIm4,IIXI4,
         XIIIm4, IZIIm4,XIIIm4, IIIZm4, IZII4, IIIZ4,
@@ -714,7 +731,7 @@ int Test_basis_permutation(LysCompiler gatelist){
         if (!(gatelist.circuit == expected_cases[idxCase]) | (numOfCommuteGates != expected_numOfCommuted[idxCase])){
             cout << "combine rotation measurements Measures List No Ancilla case " << idxCase << " fail\n" ;
             cout << "Got : \n";
-            toStrVariantVec(gatelist.circuit);
+            //toStrVariantVec(gatelist.circuit);
             return 1;
         }
     }
@@ -722,18 +739,18 @@ int Test_basis_permutation(LysCompiler gatelist){
 
 
     // Case of: there are 4 qubits, the last two are the ancilla
-    Rotation XIII4a = Rotation( 2, x, {0});                                 // rotation only act on data 0
-    Rotation IXII4a = Rotation( 2, x, {1});                                 // rotation only act on data 1
-    Rotation IIXI4a = Rotation( 2, x, {2});                                 // rotation only act on ancilla 0
-    Rotation XIZI4a = Rotation( 2, vector<char>{'x','z'}, {0,2});           // rotation act on both data and ancilla
-    Rotation XIZX4a = Rotation( 2, vector<char>{'x','z','x'}, {0,2,3});     // rotation act on both data and ancilla
-    Measure  MXIIIa = Measure(  true, x, {0});                              // only measure the data 0
-    Measure  MIIXIa = Measure(  true, x, {2});                              // only measure the ancilla 0
-    Measure  MIIIXa = Measure(  true, x, {3});                              // only measure the ancilla 1
-    Measure  MXIXIa = Measure(  true, vector<char>{'x','x'}, {0,2});        // measure both the ancilla and data
+    std::shared_ptr<Operation>  XIII4a = std::make_shared<Operation>(Rotation( 2, x, {0}));                                 // rotation only act on data 0
+    std::shared_ptr<Operation>  IXII4a = std::make_shared<Operation>(Rotation( 2, x, {1}));                                 // rotation only act on data 1
+    std::shared_ptr<Operation>  IIXI4a = std::make_shared<Operation>(Rotation( 2, x, {2}));                                 // rotation only act on ancilla 0
+    std::shared_ptr<Operation>  XIZI4a = std::make_shared<Operation>(Rotation( 2, vector<char>{'x','z'}, {0,2}));           // rotation act on both data and ancilla
+    std::shared_ptr<Operation>  XIZX4a = std::make_shared<Operation>(Rotation( 2, vector<char>{'x','z','x'}, {0,2,3}));     // rotation act on both data and ancilla
+    std::shared_ptr<Operation>  MXIIIa = std::make_shared<Operation>(Measure(  true, x, {0}));                              // only measure the data 0
+    std::shared_ptr<Operation>  MIIXIa = std::make_shared<Operation>(Measure(  true, x, {2}));                              // only measure the ancilla 0
+    std::shared_ptr<Operation>  MIIIXa = std::make_shared<Operation>(Measure(  true, x, {3}));                              // only measure the ancilla 1
+    std::shared_ptr<Operation>  MXIXIa = std::make_shared<Operation>(Measure(  true, vector<char>{'x','x'}, {0,2}));        // measure both the ancilla and data
     int ancBeginIdx = 2;                                                    // ancilla begins at index 2
 
-    vector<vector<Gate>> cases_anc = {
+    vector<vector<shared_ptr<Operation>>> cases_anc = {
         {XIII4a, IXII4a, MIIXIa},           // case 0: expect both Rs to commute over, numCommute to be 2
         {XIII4a, MIIXIa},                   // case 1: expect R to commute over, numCommute to be 1
         {IIXI4a, MIIXIa},                   // case 2: expect no action, numCommute to be 0
@@ -743,7 +760,7 @@ int Test_basis_permutation(LysCompiler gatelist){
         {XIZX4a, MIIIXa}                    // case 6: expect no action. numCommute to be 0
     };
 
-    vector<vector<Gate>> expected_gateList = {
+    vector<vector<shared_ptr<Operation>>> expected_gateList = {
         {MIIXIa, XIII4a, IXII4a},           // Case 0: must preserve the order of the Rs after commuted over   
         {MIIXIa, XIII4a},                   // Case 1: must preserve the order of the Rs after commuted over   
         {IIXI4a, MIIXIa}, 
@@ -765,7 +782,7 @@ int Test_basis_permutation(LysCompiler gatelist){
         if (!(gatelist.circuit == expected_gateList[idxCase]) | (numOfCommuteGates != expected_numCommuted[idxCase])){
             cout << "combine rotation measurements Measures List With Ancilla case " << idxCase << " fail\n" ;
             cout << "Got : \n";
-            toStrVariantVec(cases_anc[idxCase]);
+            //toStrVariantVec(cases_anc[idxCase]);
             return 1;
         }
     } 
@@ -779,25 +796,29 @@ int Test_runLysCompiler(){
 
     vector<char> z = {'z'};
     vector<char> x = {'x'};
-    vector<Gate> vGate;
-    vector<vector<Gate>> vvGate ;
-    Measure MZII = Measure(true,z,{0});
-    Measure MIZI = Measure(true,z,{1});
-    Measure MIIZ = Measure(true,z,{2});
+    vector<shared_ptr<Operation>> vGate;
+    vector<vector<shared_ptr<Operation>>> vvGate ;
 
-    Rotation TI = Rotation(1,z,{0});
-    Rotation IT = Rotation(1,z,{1});
-    Rotation ZI = Rotation(0,z,{0});
-    Rotation IZ = Rotation(0,z,{1});
-    Rotation XI = Rotation(-2,x,{0});
-    Rotation XZ = Rotation(2,vector<char>{'x','z'},{0,1});
-    Measure MXI = Measure(true,x,{0});
-    Measure MIX = Measure(true,x,{1});
-    Measure MmXI = Measure(false,x,{0});
-    Measure MmIX = Measure(false,x,{1});
+    // Shared pointers of Operations
+
+    std::shared_ptr<Operation> MZII = std::make_shared<Operation>(Measure(true,z,{0}));
+    std::shared_ptr<Operation> MIZI = std::make_shared<Operation>(Measure(true,z,{1}));
+    std::shared_ptr<Operation> MIIZ = std::make_shared<Operation>(Measure(true,z,{2}));
+
+    std::shared_ptr<Operation> TI   = std::make_shared<Operation>(Rotation(1,z,{0}));
+    std::shared_ptr<Operation> IT   = std::make_shared<Operation>(Rotation(1,z,{1}));
+    std::shared_ptr<Operation> ZI   = std::make_shared<Operation>(Rotation(0,z,{0}));
+    std::shared_ptr<Operation> IZ   = std::make_shared<Operation>(Rotation(0,z,{1}));
+    std::shared_ptr<Operation> XI   = std::make_shared<Operation>(Rotation(-2,x,{0}));
+    std::shared_ptr<Operation> XZ   = std::make_shared<Operation>(Rotation(2,vector<char>{'x','z'},{0,1}));
+    std::shared_ptr<Operation> MXI  = std::make_shared<Operation>(Measure(true,x,{0}));
+    std::shared_ptr<Operation> MIX  = std::make_shared<Operation>(Measure(true,x,{1}));
+    std::shared_ptr<Operation> MmXI = std::make_shared<Operation>(Measure(false,x,{0}));
+    std::shared_ptr<Operation> MmIX = std::make_shared<Operation>(Measure(false,x,{1}));
+
 
     // Testing idxToRemove, combine yes, layer no
-    vector<vector<Gate>> gatesTestIdxToRemove;
+    vector<vector<shared_ptr<Operation>>> gatesTestIdxToRemove;
     gatesTestIdxToRemove = {
         // case 0: circuit has only nonT and measure, expect all nonT to be removed and idxToRemove equals to length - clifford
         {ZI, IZ, XI, XZ, MXI, MIX},
@@ -818,14 +839,14 @@ int Test_runLysCompiler(){
 
     for( int idxCase = 0 ; idxCase < gatesTestIdxToRemove.size() ; idxCase++){
         LysCompiler compiler = LysCompiler(gatesTestIdxToRemove[idxCase]);
-        pair<vector<vector<Gate>>, int> compilerResults = compiler.runLysCompiler(true, false); // since layer=false, we only care about the int idxToRemove; the vecvec will be empty
+        pair<vector<vector<shared_ptr<Operation>>>, int> compilerResults = compiler.runLysCompiler(true, false); // since layer=false, we only care about the int idxToRemove; the vecvec will be empty
         int idxToRemove                                 = compilerResults.second;
 
         if ( idxToRemove != expected_idxToRemove[idxCase]){
             cout << "Test runLysCompiler test idxToRemove case " << idxCase << " fail\n" ;
             cout << "Got : \n";
             cout << "Index to remove " << idxToRemove << endl;
-            toStrVariantVec(gatesTestIdxToRemove[idxCase]);
+            //toStrVariantVec(gatesTestIdxToRemove[idxCase]);
             return 1;
         }
     } 
@@ -833,14 +854,14 @@ int Test_runLysCompiler(){
     // case 5: if combine is false, idxToRemove should always to be same as the length of the circuit
         for( int idxCase = 0 ; idxCase < gatesTestIdxToRemove.size() ; idxCase++){
         LysCompiler compiler = LysCompiler(gatesTestIdxToRemove[idxCase]);
-        pair<vector<vector<Gate>>, int> compilerResults = compiler.runLysCompiler(false, false); // since layer=false, we only care about the int idxToRemove; the vecvec will be empty
+        pair<vector<vector<shared_ptr<Operation>>>, int> compilerResults = compiler.runLysCompiler(false, false); // since layer=false, we only care about the int idxToRemove; the vecvec will be empty
         int idxToRemove                                 = compilerResults.second;
 
         if ( idxToRemove != gatesTestIdxToRemove[idxCase].size()){
             cout << "Test runLysCompiler test idxToRemove case " << idxCase << " fail\n" ;
             cout << "Got : \n";
             cout << "Index to remove " << idxToRemove << endl;
-            toStrVariantVec(gatesTestIdxToRemove[idxCase]);
+            //toStrVariantVec(gatesTestIdxToRemove[idxCase]);
             return 1;
         }
     } 
@@ -853,13 +874,13 @@ int Test_runLysCompiler(){
     
     //no combine, no layer, measure
     LysCompiler gatelist = LysCompiler(vGate);
-    pair<vector<vector<Gate>>,int>  results = gatelist.runLysCompiler(false,false);
+    pair<vector<vector<shared_ptr<Operation>>>,int>  results = gatelist.runLysCompiler(false,false);
     vvGate = {};
     if (results.first != vvGate){
         int count = 0;
-        for (vector<Gate> layer:results.first){
+        for (vector<shared_ptr<Operation>> layer:results.first){
             cout << "layer " << count << endl ;
-            toStrVariantVec(layer);
+            //toStrVariantVec(layer);
             cout << "-----\n";
             count++;
         }
@@ -873,13 +894,13 @@ int Test_runLysCompiler(){
     vvGate = {{TI,IT,ZI,IZ},{MXI},{MIX}};
     if (results.first != vvGate){
         cout << "Got : \n" ;
-        for (vector<Gate> layer: results.first){
-            toStrVariantVec(layer) ;
+        for (vector<shared_ptr<Operation>> layer: results.first){
+            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "Expected : \n" ;
-        for (vector<Gate> layer: vvGate){
-            toStrVariantVec(layer) ;
+        for (vector<shared_ptr<Operation>> layer: vvGate){
+            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "LysCompiler failed simple circuit no combine, layer, measure  \n" ; 
@@ -893,13 +914,13 @@ int Test_runLysCompiler(){
     vvGate = {{TI,IT},{MmXI},{MmIX},{ZI},{IZ}};
     if (results.first != vvGate){
         cout << "Got : \n" ;
-        for (vector<Gate> layer: results.first){
-            toStrVariantVec(layer) ;
+        for (vector<shared_ptr<Operation>> layer: results.first){
+            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "Expected : \n" ;
-        for (vector<Gate> layer: vvGate){
-            toStrVariantVec(layer) ;
+        for (vector<shared_ptr<Operation>> layer: vvGate){
+            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "LysCompiler failed simple circuit combine, layer, measure \n" ; 
@@ -921,99 +942,99 @@ int TwoBGadder(){
     //note : Lys will never have a circuit that has R-M-R-M
     // like this one, or if so, it doesn't treat the rotation
     // between the measure (no compilation for this part)
-    vector<Gate> circuit = {
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Rotation(1,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{0,4}),
-        Rotation(-2,z,{0}),
-        Rotation(-2,x,{4}),
-        Rotation(2,vector<char>{'z','x'},{1,4}),
-        Rotation(-2,z,{1}),
-        Rotation(-2,x,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,0}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{0}),
-        Rotation(2,vector<char>{'z','x'},{4,1}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{1}),
-        Rotation(-1,z,{0}),
-        Rotation(-1,z,{1}),
-        Rotation(1,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,0}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{0}),
-        Rotation(2,vector<char>{'z','x'},{4,1}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{1}),
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Rotation(2,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,3}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{3}),
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Measure(true,z,{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(-2,z,{0}),Rotation(-2,z,{1})}),
-        Rotation(2,vector<char>{'z','x'},{0,1}),
-        Rotation(-2,z,{0}),
-        Rotation(-2,x,{1}),
-        Rotation(2,vector<char>{'z','x'},{2,3}),
-        Rotation(-2,z,{2}),
-        Rotation(-2,x,{3}),
-        Measure(true,z,{0}),
-        Measure(true,z,{1}),
-        Measure(true,z,{2}),
-        Measure(true,z,{3})
+    vector<shared_ptr<Operation>> circuit = {
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(1,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,4})),
+        std::make_shared<Operation>(Rotation(-2,z,{0})),
+        std::make_shared<Operation>(Rotation(-2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,4})),
+        std::make_shared<Operation>(Rotation(-2,z,{1})),
+        std::make_shared<Operation>(Rotation(-2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,0})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{0})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,1})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{1})),
+        std::make_shared<Operation>(Rotation(-1,z,{0})),
+        std::make_shared<Operation>(Rotation(-1,z,{1})),
+        std::make_shared<Operation>(Rotation(1,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,0})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{0})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,1})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{1})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,3})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Measure(true,z,{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(-2,z,{0}),Rotation(-2,z,{1})})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,1})),
+        std::make_shared<Operation>(Rotation(-2,z,{0})),
+        std::make_shared<Operation>(Rotation(-2,x,{1})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{2,3})),
+        std::make_shared<Operation>(Rotation(-2,z,{2})),
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Measure(true,z,{0})),
+        std::make_shared<Operation>(Measure(true,z,{1})),
+        std::make_shared<Operation>(Measure(true,z,{2})),
+        std::make_shared<Operation>(Measure(true,z,{3}))
     };
     LysCompiler gatelist = LysCompiler(circuit,4);
     gatelist.runLysCompiler(false,false);
-    vector<Gate> expected = {
-        Rotation(1,x,{4}),
-        Rotation(-1,vector<char>{'z','x'},{1,4}),
-        Rotation(-1,vector<char>{'z','x'},{0,4}),
-        Rotation(1,vector<char>{'z','z','x'},{0,1,4}),
-        Rotation(2,z,{4}),
-        Rotation(-2,z,{0}),
-        Rotation(-2,z,{1}),
-        Rotation(-2,x,{3}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{0,4}),
-        Rotation(0,x,{4}),
-        Rotation(2,vector<char>{'z','x'},{1,4}),
-        Rotation(0,vector<char>{'x','z'},{0,4}),
-        Rotation(0,x,{0}),
-        Rotation(0,vector<char>{'x','z'},{1,4}),
-        Rotation(0,x,{1}),
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(0,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,3}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Measure(true,z,{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(-2,z,{0}),Rotation(-2,z,{1})}),
-        Rotation(2,vector<char>{'z','x'},{0,1}),
-        Rotation(-2,z,{0}),
-        Rotation(-2,x,{1}),
-        Rotation(2,vector<char>{'z','x'},{2,3}),
-        Rotation(-2,z,{2}),
-        Rotation(-2,x,{3}),
-        Measure(true,z,{0}),
-        Measure(true,z,{1}),
-        Measure(true,z,{2}),
-        Measure(true,z,{3})
+    vector<shared_ptr<Operation>> expected = {
+        std::make_shared<Operation>(Rotation(1,x,{4})),
+        std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{1,4})),
+        std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{0,4})),
+        std::make_shared<Operation>(Rotation(1,vector<char>{'z','z','x'},{0,1,4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,z,{0})),
+        std::make_shared<Operation>(Rotation(-2,z,{1})),
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,4})),
+        std::make_shared<Operation>(Rotation(0,x,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,4})),
+        std::make_shared<Operation>(Rotation(0,vector<char>{'x','z'},{0,4})),
+        std::make_shared<Operation>(Rotation(0,x,{0})),
+        std::make_shared<Operation>(Rotation(0,vector<char>{'x','z'},{1,4})),
+        std::make_shared<Operation>(Rotation(0,x,{1})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(0,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,3})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Measure(true,z,{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(-2,z,{0}),Rotation(-2,z,{1})})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,1})),
+        std::make_shared<Operation>(Rotation(-2,z,{0})),
+        std::make_shared<Operation>(Rotation(-2,x,{1})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{2,3})),
+        std::make_shared<Operation>(Rotation(-2,z,{2})),
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Measure(true,z,{0})),
+        std::make_shared<Operation>(Measure(true,z,{1})),
+        std::make_shared<Operation>(Measure(true,z,{2})),
+        std::make_shared<Operation>(Measure(true,z,{3}))
     };
     
     if(expected != gatelist.circuit){
         cout << "Gadder false-false failed \n";
         cout << " Got : \n" ; 
-        toStrVariantVec(gatelist.circuit);
+        //toStrVariantVec(gatelist.circuit);
         cout << " Expected : \n" ; 
-        toStrVariantVec(expected);
+        //toStrVariantVec(expected);
         for(int idxG = 0; idxG < expected.size() ; idxG++){
             if (expected[idxG] != gatelist.circuit[idxG]){
                 cout << "at index " << idxG << endl;
@@ -1027,75 +1048,75 @@ int TwoBGadder(){
     // first part of the previous circuit (cut as it is suppose to
     // be before runLysCompiler)
     circuit = {
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Rotation(1,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{0,4}),
-        Rotation(-2,z,{0}),
-        Rotation(-2,x,{4}),
-        Rotation(2,vector<char>{'z','x'},{1,4}),
-        Rotation(-2,z,{1}),
-        Rotation(-2,x,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,0}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{0}),
-        Rotation(2,vector<char>{'z','x'},{4,1}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{1}),
-        Rotation(-1,z,{0}),
-        Rotation(-1,z,{1}),
-        Rotation(1,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,0}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{0}),
-        Rotation(2,vector<char>{'z','x'},{4,1}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{1}),
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Rotation(2,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,3}),
-        Rotation(-2,z,{4}),
-        Rotation(-2,x,{3}),
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Measure(true,z,{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(-2,z,{0}),Rotation(-2,z,{1})})
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(1,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,4})),
+        std::make_shared<Operation>(Rotation(-2,z,{0})),
+        std::make_shared<Operation>(Rotation(-2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,4})),
+        std::make_shared<Operation>(Rotation(-2,z,{1})),
+        std::make_shared<Operation>(Rotation(-2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,0})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{0})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,1})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{1})),
+        std::make_shared<Operation>(Rotation(-1,z,{0})),
+        std::make_shared<Operation>(Rotation(-1,z,{1})),
+        std::make_shared<Operation>(Rotation(1,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,0})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{0})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,1})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{1})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,3})),
+        std::make_shared<Operation>(Rotation(-2,z,{4})),
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Measure(true,z,{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(-2,z,{0}),Rotation(-2,z,{1})}))
     };
     gatelist = LysCompiler(circuit,4);
     gatelist.runLysCompiler(true,false);
     expected = {
-        Rotation(1,x,{4}),
-        Rotation(-1,vector<char>{'z','x'},{1,4}),
-        Rotation(-1,vector<char>{'z','x'},{0,4}),
-        Rotation(1,vector<char>{'z','z','x'},{0,1,4}),
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,z,{4}),
-        Rotation(2,vector<char>{'z','x'},{0,4}),
-        Rotation(2,vector<char>{'z','x'},{1,4}),
-        Rotation(0,x,{4}),
-        Rotation(-2,z,{0}),
-        Rotation(0,vector<char>{'x','z'},{0,4}),
-        Rotation(-2,z,{1}),
-        Rotation(0,vector<char>{'x','z'},{1,4}),
-        Rotation(2,z,{4}),
-        Rotation(2,x,{4}),
-        Rotation(2,vector<char>{'z','x'},{4,3}),
-        Measure(false,vector<char>{'y'},{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(2,z,{0}),Rotation(2,z,{1})}),
-        Rotation(-2,x,{3}),
-        Rotation(0,x,{0}),
-        Rotation(0,x,{1})
+        std::make_shared<Operation>(Rotation(1,x,{4})),
+        std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{1,4})),
+        std::make_shared<Operation>(Rotation(-1,vector<char>{'z','x'},{0,4})),
+        std::make_shared<Operation>(Rotation(1,vector<char>{'z','z','x'},{0,1,4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{1,4})),
+        std::make_shared<Operation>(Rotation(0,x,{4})),
+        std::make_shared<Operation>(Rotation(-2,z,{0})),
+        std::make_shared<Operation>(Rotation(0,vector<char>{'x','z'},{0,4})),
+        std::make_shared<Operation>(Rotation(-2,z,{1})),
+        std::make_shared<Operation>(Rotation(0,vector<char>{'x','z'},{1,4})),
+        std::make_shared<Operation>(Rotation(2,z,{4})),
+        std::make_shared<Operation>(Rotation(2,x,{4})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{4,3})),
+        std::make_shared<Operation>(Measure(false,vector<char>{'y'},{4},{Rotation(2,vector<char>{'z','z'},{0,1}),Rotation(2,z,{0}),Rotation(2,z,{1})})),
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Rotation(0,x,{0})),
+        std::make_shared<Operation>(Rotation(0,x,{1}))
     };
     
     if(expected != gatelist.circuit){
         cout << "Gadder true-false part 1 failed \n";
         cout << " Got : \n" ; 
-        toStrVariantVec(gatelist.circuit);
+        //toStrVariantVec(gatelist.circuit);
         cout << " Expected : \n" ; 
-        toStrVariantVec(expected);
+        //toStrVariantVec(expected);
         for(int idxG = 0; idxG < expected.size() ; idxG++){
             if (expected[idxG] != gatelist.circuit[idxG]){
                 cout << "at index " << idxG << endl;
@@ -1110,41 +1131,41 @@ int TwoBGadder(){
     // functions (before call to this->runLysCompiler,
     // should be done in runLysCompiler.cpp
     circuit = {
-        Rotation(-2,x,{3}),
-        Rotation(0,x,{0}),
-        Rotation(0,x,{1}),
-        Rotation(2,vector<char>{'z','x'},{0,1}),
-        Rotation(-2,z,{0}),
-        Rotation(-2,x,{1}),
-        Rotation(2,vector<char>{'z','x'},{2,3}),
-        Rotation(-2,z,{2}),
-        Rotation(-2,x,{3}),
-        Measure(true,z,{0}),
-        Measure(true,z,{1}),
-        Measure(true,z,{2}),
-        Measure(true,z,{3})
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Rotation(0,x,{0})),
+        std::make_shared<Operation>(Rotation(0,x,{1})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,1})),
+        std::make_shared<Operation>(Rotation(-2,z,{0})),
+        std::make_shared<Operation>(Rotation(-2,x,{1})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{2,3})),
+        std::make_shared<Operation>(Rotation(-2,z,{2})),
+        std::make_shared<Operation>(Rotation(-2,x,{3})),
+        std::make_shared<Operation>(Measure(true,z,{0})),
+        std::make_shared<Operation>(Measure(true,z,{1})),
+        std::make_shared<Operation>(Measure(true,z,{2})),
+        std::make_shared<Operation>(Measure(true,z,{3}))
     };
     gatelist = LysCompiler(circuit,4);
     gatelist.runLysCompiler(true,false);
     expected = {
-        Measure(false,z,{0}),
-        Measure(true,vector<char>{'z','z'},{0,1}),
-        Measure(true,z,{2}),
-        Measure(false,vector<char>{'z','y'},{2,3}),
-        Rotation(2,vector<char>{'z','x'},{2,3}),
-        Rotation(0,x,{0}),
-        Rotation(2,vector<char>{'z','x'},{0,1}),
-        Rotation(0,x,{3}),
-        Rotation(2,x,{1}),
-        Rotation(-2,z,{2}),
-        Rotation(-2,z,{0})
+        std::make_shared<Operation>(Measure(false,z,{0})),
+        std::make_shared<Operation>(Measure(true,vector<char>{'z','z'},{0,1})),
+        std::make_shared<Operation>(Measure(true,z,{2})),
+        std::make_shared<Operation>(Measure(false,vector<char>{'z','y'},{2,3})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{2,3})),
+        std::make_shared<Operation>(Rotation(0,x,{0})),
+        std::make_shared<Operation>(Rotation(2,vector<char>{'z','x'},{0,1})),
+        std::make_shared<Operation>(Rotation(0,x,{3})),
+        std::make_shared<Operation>(Rotation(2,x,{1})),
+        std::make_shared<Operation>(Rotation(-2,z,{2})),
+        std::make_shared<Operation>(Rotation(-2,z,{0}))
     };
     if(expected != gatelist.circuit){
         cout << "Gadder true-false part 2 failed \n";
         cout << " Got : \n" ; 
-        toStrVariantVec(gatelist.circuit);
+        //toStrVariantVec(gatelist.circuit);
         cout << " Expected : \n" ; 
-        toStrVariantVec(expected);
+        //toStrVariantVec(expected);
         for(int idxG = 0; idxG < expected.size() ; idxG++){
             if (expected[idxG] != gatelist.circuit[idxG]){
                 cout << "at index " << idxG << endl;
@@ -1154,25 +1175,30 @@ int TwoBGadder(){
         return 1;
     }
 
-    cout << "Gadder passed \n";
+    cout <<"Gadder passed \n";
     return 0;
 }
 
+
 int main(){
-    LysCompiler gatelist = LysCompiler({Rotation(1,vector<char>{},{})});
+    LysCompiler gatelist = LysCompiler(
+            {
+                std::make_shared<Operation>(Rotation(1,vector<char>{},{}))
+            }
+        );
     vector<int> results = {
         Test_defaultInitiatization(),
         Test_combineRotation(gatelist),
         Test_implementNoOrderingRotationCombination(gatelist),
         Test_noOrderingRotationCombination(gatelist),
+        Test_reduceLayerGreedyAlgo(gatelist),
         Test_rearrange_clifford_gates(gatelist),
         Test_applyCommutationRM(gatelist),
         Test_basis_permutation(gatelist),
+        Test_runLysCompiler(),
         Test_applyCommutation(gatelist),
         Test_pushTForwardThread(gatelist),
-        Test_reduceLayerGreedyAlgo(gatelist),
         Test_optimizeRotation(),
-        Test_runLysCompiler(),
         TwoBGadder()
     };
     int count = 0 ;
