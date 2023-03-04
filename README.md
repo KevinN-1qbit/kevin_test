@@ -2,22 +2,22 @@
 
 Source code for the Lys compiler. 
 
-# Getting started Docker:
+# Using Docker to utilize the Transpiler:
 
-There is a docker image with all the required dependencies installed. You can run the compiler 
-in it by following the steps below:
+There is a docker image with all the required dependencies installed. You can run the transpiler
+with a simple make command
 
-1. ```docker run -it quay.io/1qbit/hansa bash```
+```make transpiler PATH/TO/CIRCUIT (lys.py cmdargs) ```
 
-2. Navigate to ```Trillium/src/cpp_compiler``` folder.
+List of Command Arguments for the Transpiler:
 
-3. Run ```cmake .``` followed by ```make``` 
+1. input_file
+2. language
+3. combine
+4. recompile_cpp
+5. epsilon
 
-4. Navigate to ```/workspace``` and run ```pip install -e .```
-
-5. From here you should be able to run the Compilation by using the ```lys.py``` file
-
-This should produce an txt output file result in the ```data/output``` directory
+This should produce a txt output file result of the transpiled circuit within the provided ```PATH/TO/CIRCUIT```
 
 # Getting started Local Development:
 
