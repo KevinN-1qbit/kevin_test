@@ -2,7 +2,7 @@
 
 Source code for the Lys compiler. 
 
-# Using Docker to utilize the Transpiler:
+# Using Docker to Create the transpiled circuit:
 
 There is a docker image with all the required dependencies installed. You can run the transpiler
 with a simple make command
@@ -18,6 +18,8 @@ List of Command Arguments for the Transpiler:
 5. epsilon
 
 This should produce a txt output file result of the transpiled circuit within the provided ```PATH/TO/CIRCUIT```
+
+* Important Note: File paths should be the full path to the file to ensure proper volume mounting
 
 # Getting started Local Development:
 
