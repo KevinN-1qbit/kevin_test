@@ -1,37 +1,20 @@
-BUILD_ARGS_TAG ?= latest
+BUILD_ARGS_TAG 	= latest
 
-CIRCUIT_PATH 	= ${circuit_path}
+# Default Transpiler configs
+combine 		= True
+recompile 		= False
+epsilon			= 1e-10	
 
-# Transpiler configs
-INPUT_FILE 		= ${input_file}
-LANGUAGE 		= ${language}
-COMBINE 		= ${combine}
-RECOMPILE_CPP 	= ${recompile_cpp}
-EPISLON 		= ${epsilon}
-
-
+.PHONY: build
 build:
 	docker build . -t quay.io/1qbit/hansa:${BUILD_ARGS_TAG} -f Dockerfile
 
+.PHONY: push
 push:
 	docker push quay.io/1qbit/hansa:${BUILD_ARGS_TAG}
 
+.PHONY: transpiler
 transpiler:
-	docker run -i -v ${CIRCUIT_PATH}:/workspace/Trillium/data quay.io/1qbit/hansa:${BUILD_ARGS_TAG} bash -c \ 
-	""python3 lys.py -input data/input/test_circuits/qasm_test_10_lines.qasm -language qasm "" 
-
-kevintest:
-	if [ -z "$(CIRCUIT_PATH)" ]; then \
-		echo "Hello World"; \
-	else \
-		echo $(CIRCUIT_PATH); \
-	fi
-
-.PHONY: my_target
-my_target:
-	if [ -z "$(PARAM)" ]; then \
-		echo "Hello World"; \
-	else \
-		echo $(PARAM); \
-	fi
-
+	docker run -v ${circuit_path}:/workspace/Trillium/data/output -v $(input):$(input) \
+	quay.io/1qbit/hansa:${BUILD_ARGS_TAG} bash -c \
+	"python3 Trillium/lys.py -input $(input) -language $(language) -combine $(combine) -recompile $(recompile) -epsilon $(epsilon)" 
