@@ -7,17 +7,19 @@ Source code for the Lys compiler.
 There is a docker image with all the required dependencies installed. You can run the transpiler
 with a simple make command
 
-```make transpiler PATH/TO/CIRCUIT (lys.py cmdargs) ```
+```make transpiler CIRCUITPATH (lys.py cmdargs) ```
 
 List of Command Arguments for the Transpiler:
 
-1. input_file
+1. input
 2. language
-3. combine
-4. recompile_cpp
-5. epsilon
+3. combine (optional)
+4. recompile (optional)
+5. epsilon (optional)
 
 This should produce a txt output file result of the transpiled circuit within the provided ```PATH/TO/CIRCUIT```
+
+Example command: ```make transpiler circuit_path={CIRCUITPATH} input={INPUT} language={LANGUAGE} combine={COMBINE} recompile={RECOMPILE} epsilon={EPSILON}```
 
 * Important Note: File paths should be the full path to the file to ensure proper volume mounting
 
