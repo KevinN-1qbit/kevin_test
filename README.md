@@ -21,7 +21,6 @@ List of Command Arguments for the Transpiler:
 | combine (optional)      | Choose whether to combine the non-T rotations with measurement. Default is True|
 | recompile (optional     | Choose whether to recompile the cpp source code. Default is False|
 | epsilon (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
-| version (optional)       | Print the version of the tool                                    |
 
 This should produce a txt output file result of the transpiled circuit within the provided ```circuit_path```
 
