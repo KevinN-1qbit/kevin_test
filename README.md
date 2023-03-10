@@ -7,7 +7,7 @@ Source code for the Lys compiler.
 There is a docker image with all the required dependencies installed. You can run the transpiler
 with a simple make command
 
-```make transpiler circuit_path (lys.py cmdargs) ```
+```make transpiler transpiled_circuit_path (lys.py cmdargs) ```
 
 circuit_path should be the directory where you would like the transpiled circuit to be written to
 
@@ -21,11 +21,11 @@ List of Command Arguments for the Transpiler:
 | combine (optional)      | Choose whether to combine the non-T rotations with measurement. Default is True|
 | recompile (optional     | Choose whether to recompile the cpp source code. Default is False|
 | epsilon (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
-| version (optional       | Print the version of the tool                                    |
+| version (optional)       | Print the version of the tool                                    |
 
 This should produce a txt output file result of the transpiled circuit within the provided ```circuit_path```
 
-Example command: ```make transpiler circuit_path={CIRCUITPATH} input={INPUT} language={LANGUAGE} combine={COMBINE} recompile={RECOMPILE} epsilon={EPSILON}```
+Example command: ```make transpiler transpiled_circuit_path={TRANSPILEDCIRCUITPATH} input={INPUT} language={LANGUAGE} combine={COMBINE} recompile={RECOMPILE} epsilon={EPSILON}```
 
 * Important Note: File paths should be the absolute path to the file to ensure proper volume mounting
 
