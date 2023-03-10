@@ -15,13 +15,6 @@
 #include <algorithm>
 #include <variant>
 
-//typedef std::variant<Rotation,Measure> Gate; //Type-safe union of Rotation and Measure
-
-/**
- * @brief A helper function to print out the gates in the format of R1 : XXIZZ
- */
-//void toStrVariantVec(std::vector<Gate> &gateVec);
-
 /**
  * @brief Lys compiler class transforms the input circuit in the set Clifford+T into a T+measurements.
  *
@@ -54,15 +47,6 @@ public:
       */
      LysCompiler(std::vector<std::shared_ptr<Operation>> encoded_circuit, int ancillaBegin);
 
-    // /**
-    //  * @brief Construct a new Lys Compiler object with default measurements: {ZII...I, IZI...I, ..., I...IZI, I..IIZ}. Assuming the circuit doesn't have data qubit measures at the end
-    //  *
-    //  * @param numDefaultMeasurements Number of Z Measure to add to the circuit, these Z measurements will
-    //  * be add to qubits corresponding to the numQubits most significant bits in int representations.
-    //  * @param encoded_circuit Target encoded circuit as a vector of Rotations and Measure. Must not have data qubit measures at the end of the circuit.
-    //  * @param ancillaBegin: index at which the ancillas start.
-    //  */
-    // LysCompiler(int numDefaultMeasurements, std::vector<Gate> encoded_circuit, int ancillaBegin);
 
     /**
      * @brief Construct a new Lys Compiler object with default measurements: {ZII...I, IZI...I, ..., I...IZI, I..IIZ}. Assuming the circuit doesn't have data qubit measures at the end
@@ -158,29 +142,6 @@ public:
      */
     static Measure applyCommutation(Rotation R1, Measure M1);
 
-//     /**
-//     * @brief Permute a Measure with a Rotation that DON'T commute (PP'=-P'P)
-//     * Rotation must be a tgate (pi/8, i.e. angle equivalent to +/-1)
-//     *
-//     * @param Meas Measure object
-//     * @param tGate Rotation object (angle must be +/-1).
-//      that DON'T COMMUTE with Meas.
-//     *
-//     * @return Measure return the resulting Rotation of the permutation of Meas and tgate
-//     */
-//    static Rotation applyCommutation(Measure Meas, Rotation tGate);
-
-//    /**
-//     * @brief Permute a Gate with a Rotation that DON'T commute (PP'=-P'P)
-//     * Rotation must be a tgate (pi/8, i.e. angle equivalent to +/-1)
-//     *
-//     * @param gate Gate object (Rotation or Measure)
-//     * @param tGate Rotation object (angle must be +/-1).
-//      that DON'T COMMUTE with gate.
-//     *
-//     * @return Rotation return the resulting Rotation of the permutation of gate and tGate
-//     */
-//    static Rotation applyCommutation(Operation gate, Rotation tGate);
 
     /**
      * @brief Commute all the T gates to the front of the circuit.
@@ -260,23 +221,6 @@ public:
       */
     std::vector<std::vector<std::shared_ptr<Operation>>> reduceLayerGreedyAlgo(std::vector<std::shared_ptr<Operation>> &circuitVec);
 
-    // /**
-    //  *@brief This method is applied to the circuit of the object.  Run a timed version of the optimized Rotation.
-    //  * It will :
-    //  *      1. Push T forward
-    //  *      2. Create layers for the T gates
-    //  *      3. Try to combine gates into each layer
-    //  *      4. Do 1-3 until there is no more change
-    //  *      5. Reduce the number of non-T gates (step 2 and 3 for nonT)
-    //  *
-    //  * @note Change list_of_clifford_gates in place.
-    //  * @note TODO : don't return the circuit, the change are already done inplace
-    //  *
-    //  *
-    //  * @return pair<vector<Gate>, map<string, double>> Return a Vector of the flatten Gate circuit.
-    //  * Also send back a map involving the runtime information.
-    //  */
-    // std::pair<std::vector<Gate>, std::map<std::string, double> > optimizeRotationTimed();
 
     /**
      *@brief This method is apply to the circuit of the object. It reduce the gate count.
@@ -292,7 +236,6 @@ public:
      * @return std::pair<std::vector<Gate>,std::vector<Gate>> first vector are the t gates, second the nonT gates
      *
      */
-    // std::pair<std::vector<Gate>,std::vector<Gate>>  optimizeRotation();
     int optimizeRotation();
 
 
@@ -341,15 +284,5 @@ public:
 
 };
 
-/**
-    * @brief Take an element from the variant Gate and return an Operation obj that's either Rotation or Measure obj
-    *
-    * @note Helper function to access the content of the union of variant since one cannot directly access what's inside the variant
-    *
-    * @param gate a Gates object that can either be a Rotation or a Measure
-    *
-    * @return Operation object, either a Rotation or a Measure
-    */
-//Operation gateToOp(Gate gate);
 
 #endif /* LysCompiler_hpp */

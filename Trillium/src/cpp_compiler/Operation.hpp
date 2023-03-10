@@ -122,21 +122,6 @@ public:
 
 };
 
-///**
-// * @brief Return a string of the X basis (binary rep)
-// *
-// *
-// * @return std::string of the Xbasis in binary representation, e.g. 100101
-//*/
-//std::string Bitset2StringX(const Operation op);
-//
-///**
-// * @brief Return a string of the Z basis (binary rep)
-// *
-// *
-// * @return std::string of the Zbasis in binary representation, e.g. 100101
-//*/
-//std::string Bitset2StringZ(const Operation op);
 
 #endif
 

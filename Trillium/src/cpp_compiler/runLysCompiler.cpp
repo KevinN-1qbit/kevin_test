@@ -87,7 +87,6 @@ py::tuple outputToPythonObj (vector<shared_ptr<Operation>> compilerResults) {
 
 py::tuple run_lys_with_mea(vector<Rotation> rotations, vector<int> roIndex, vector<Measure> measures, vector<int> meIndex, bool combine) {
     // the circuit has non-default measurement in the middle or at the end of the circuit
-//    std::vector<Gate> gates(roIndex.size() + meIndex.size());
     std::vector<std::shared_ptr<Operation>> gates(roIndex.size() + meIndex.size());
 
     for (int i=0; i< roIndex.size(); i++){
@@ -111,10 +110,8 @@ py::tuple run_lys_with_mea(vector<Rotation> rotations, vector<int> roIndex, vect
 
 py::tuple run_lys_default_mea(int numDefaultMeasurements, vector<Rotation> rotations, bool combine) {
     // the circuit has no measurement and we append a default measurement at the end 
-//    std::vector<Gate> gates(rotations.size());
     std::vector<std::shared_ptr<Operation>> gates;
     gates.reserve(rotations.size());
-//    for (int i=0; i< rotations.size(); i++) gates[i] = rotations[i];
     for (int i=0; i< rotations.size(); i++){
         gates.emplace_back(std::make_shared<Rotation>(rotations[i]));
     }
@@ -260,9 +257,6 @@ BOOST_PYTHON_MODULE(runLysCompiler)
         .def(vector_indexing_suite<std::vector<vector<Measure>> >() )
     ;
 
-//    class_<std::vector<Gate> >("GateVec")
-//        .def(vector_indexing_suite<std::vector<Gate> >() )
-    ;
 
     class_<std::vector<int> >("indexVec")
         .def(vector_indexing_suite<std::vector<int> >() )
