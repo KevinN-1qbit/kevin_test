@@ -19,7 +19,7 @@ List of Command Arguments for the Transpiler:
 | input                   | Absolute path to the input circuit file.                         |
 | language                | Choose the language of the circuit file. [qasm, projectq]        |
 | combine (optional)      | Choose whether to combine the non-T rotations with measurement. Default is True|
-| recompile (optional     | Choose whether to recompile the cpp source code. Default is False|
+| recompile (optional)     | Choose whether to recompile the cpp source code. Default is False|
 | epsilon (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
 
 This should produce a txt output file result of the transpiled circuit within the provided ```circuit_path```
