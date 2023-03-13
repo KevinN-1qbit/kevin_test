@@ -2,22 +2,31 @@
 
 Source code for the Lys compiler. 
 
-# Getting started Docker:
+# Using Docker to Create the transpiled circuit:
 
-There is a docker image with all the required dependencies installed. You can run the compiler 
-in it by following the steps below:
+There is a docker image with all the required dependencies installed. You can run the transpiler
+with a simple make command
 
-1. ```docker run -it quay.io/1qbit/hansa bash```
+```make transpiler transpiled_circuit_path (lys.py cmdargs) ```
 
-2. Navigate to ```Trillium/src/cpp_compiler``` folder.
+circuit_path should be the directory where you would like the transpiled circuit to be written to
 
-3. Run ```cmake .``` followed by ```make``` 
+List of Command Arguments for the Transpiler:
 
-4. Navigate to ```/workspace``` and run ```pip install -e .```
 
-5. From here you should be able to run the Compilation by using the ```lys.py``` file
+| Paramter                | URL                                                              |
+|------------------------ | --------------------------------------------------------------   |
+| input                   | Absolute path to the input circuit file.                         |
+| language                | Choose the language of the circuit file. [qasm, projectq]        |
+| combine (optional)      | Choose whether to combine the non-T rotations with measurement. Default is True|
+| recompile (optional)     | Choose whether to recompile the cpp source code. Default is False|
+| epsilon (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
 
-This should produce an txt output file result in the ```data/output``` directory
+This should produce a txt output file result of the transpiled circuit within the provided ```circuit_path```
+
+Example command: ```make transpiler transpiled_circuit_path={TRANSPILEDCIRCUITPATH} input={INPUT} language={LANGUAGE} combine={COMBINE} recompile={RECOMPILE} epsilon={EPSILON}```
+
+* Important Note: File paths should be the absolute path to the file to ensure proper volume mounting
 
 # Getting started Local Development:
 
