@@ -18,7 +18,7 @@ push:
 # Pull image and build transpiled circuit
 .PHONY: transpiler
 transpiler:
-	docker pull quay.io/1qbit/hansa:${BUILD_ARGS_TAG}
+	docker build . -t quay.io/1qbit/hansa:${BUILD_ARGS_TAG} -f Dockerfile
 	docker run -v ${transpiled_circuit_path}:/workspace/Trillium/data/output -v $(input):/workspace/Trillium/input$(input) \
 	quay.io/1qbit/hansa:${BUILD_ARGS_TAG} bash -c \
 	"python3 lys.py -input /workspace/Trillium/input$(input) -language $(language) -combine $(combine) -recompile $(recompile) -epsilon $(epsilon)" 
