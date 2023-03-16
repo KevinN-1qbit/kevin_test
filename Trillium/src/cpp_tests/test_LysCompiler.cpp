@@ -17,13 +17,18 @@ int Test_defaultInitiatization()
     LysCompiler gatelist = LysCompiler(3,flatten_gate);
 
     vector<shared_ptr<Operation>> expected_measure = {  
-        std::make_shared<Measure>(Measure(true,z,{0})),
-        std::make_shared<Measure>(Measure(true,z,{1})),
-        std::make_shared<Measure>(Measure(true,z,{2}))
+        std::make_shared<Operation>(Measure(true,z,{0})),
+        std::make_shared<Operation>(Measure(true,z,{1})),
+        std::make_shared<Operation>(Measure(true,z,{2}))
     };
-    if(expected_measure!=vector<shared_ptr<Operation>>(gatelist.circuit.begin()+5,gatelist.circuit.end())){
-        //toStrVariantVec(gatelist.circuit) ;
-        //toStrVariantVec(expected_measure) ;
+
+    vector<shared_ptr<Operation>> calculated_measure = vector<shared_ptr<Operation>>(gatelist.circuit.begin()+5,gatelist.circuit.end());
+
+    cout << calculated_measure.size();
+    cout << expected_measure.size();
+
+    
+    if(expected_measure!=calculated_measure){
         cout << "defaultInitialization failed\n";
         
         return 1;
@@ -348,7 +353,6 @@ int Test_pushTForwardThread(LysCompiler gatelist)
     };
     gatelist.pushTForwardThread(flatten_gates,0,flatten_gates.size(),zero,0);
     if (flatten_gates!=expected_forward_pushed_gates) {  
-        //toStrVariantVec(flatten_gates);
         cout << "pushTForwardThread case Measure and Rotation that commute test failed\n" ;
         return 1;
     }
@@ -423,7 +427,6 @@ int Test_reduceLayerGreedyAlgo(LysCompiler gatelist){
     if (greedy_reduced_gates!=expected_greedy_reduced_gates) {
         for(vector<shared_ptr<Operation>> vG:greedy_reduced_gates){
             cout << " ---- layer ---- \n"; 
-            //toStrVariantVec(vG);
         }
         cout << " greedy case Two commutable gates failed\n" ;
         return 1;
@@ -731,7 +734,6 @@ int Test_basis_permutation(LysCompiler gatelist){
         if (!(gatelist.circuit == expected_cases[idxCase]) | (numOfCommuteGates != expected_numOfCommuted[idxCase])){
             cout << "combine rotation measurements Measures List No Ancilla case " << idxCase << " fail\n" ;
             cout << "Got : \n";
-            //toStrVariantVec(gatelist.circuit);
             return 1;
         }
     }
@@ -782,7 +784,6 @@ int Test_basis_permutation(LysCompiler gatelist){
         if (!(gatelist.circuit == expected_gateList[idxCase]) | (numOfCommuteGates != expected_numCommuted[idxCase])){
             cout << "combine rotation measurements Measures List With Ancilla case " << idxCase << " fail\n" ;
             cout << "Got : \n";
-            //toStrVariantVec(cases_anc[idxCase]);
             return 1;
         }
     } 
@@ -846,7 +847,6 @@ int Test_runLysCompiler(){
             cout << "Test runLysCompiler test idxToRemove case " << idxCase << " fail\n" ;
             cout << "Got : \n";
             cout << "Index to remove " << idxToRemove << endl;
-            //toStrVariantVec(gatesTestIdxToRemove[idxCase]);
             return 1;
         }
     } 
@@ -861,7 +861,6 @@ int Test_runLysCompiler(){
             cout << "Test runLysCompiler test idxToRemove case " << idxCase << " fail\n" ;
             cout << "Got : \n";
             cout << "Index to remove " << idxToRemove << endl;
-            //toStrVariantVec(gatesTestIdxToRemove[idxCase]);
             return 1;
         }
     } 
@@ -880,7 +879,6 @@ int Test_runLysCompiler(){
         int count = 0;
         for (vector<shared_ptr<Operation>> layer:results.first){
             cout << "layer " << count << endl ;
-            //toStrVariantVec(layer);
             cout << "-----\n";
             count++;
         }
@@ -895,12 +893,10 @@ int Test_runLysCompiler(){
     if (results.first != vvGate){
         cout << "Got : \n" ;
         for (vector<shared_ptr<Operation>> layer: results.first){
-            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "Expected : \n" ;
         for (vector<shared_ptr<Operation>> layer: vvGate){
-            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "LysCompiler failed simple circuit no combine, layer, measure  \n" ; 
@@ -915,12 +911,10 @@ int Test_runLysCompiler(){
     if (results.first != vvGate){
         cout << "Got : \n" ;
         for (vector<shared_ptr<Operation>> layer: results.first){
-            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "Expected : \n" ;
         for (vector<shared_ptr<Operation>> layer: vvGate){
-            //toStrVariantVec(layer) ;
             cout << "------ \n" ;
         }
         cout << "LysCompiler failed simple circuit combine, layer, measure \n" ; 
@@ -1032,9 +1026,7 @@ int TwoBGadder(){
     if(expected != gatelist.circuit){
         cout << "Gadder false-false failed \n";
         cout << " Got : \n" ; 
-        //toStrVariantVec(gatelist.circuit);
         cout << " Expected : \n" ; 
-        //toStrVariantVec(expected);
         for(int idxG = 0; idxG < expected.size() ; idxG++){
             if (expected[idxG] != gatelist.circuit[idxG]){
                 cout << "at index " << idxG << endl;
@@ -1114,9 +1106,7 @@ int TwoBGadder(){
     if(expected != gatelist.circuit){
         cout << "Gadder true-false part 1 failed \n";
         cout << " Got : \n" ; 
-        //toStrVariantVec(gatelist.circuit);
         cout << " Expected : \n" ; 
-        //toStrVariantVec(expected);
         for(int idxG = 0; idxG < expected.size() ; idxG++){
             if (expected[idxG] != gatelist.circuit[idxG]){
                 cout << "at index " << idxG << endl;
@@ -1163,9 +1153,7 @@ int TwoBGadder(){
     if(expected != gatelist.circuit){
         cout << "Gadder true-false part 2 failed \n";
         cout << " Got : \n" ; 
-        //toStrVariantVec(gatelist.circuit);
         cout << " Expected : \n" ; 
-        //toStrVariantVec(expected);
         for(int idxG = 0; idxG < expected.size() ; idxG++){
             if (expected[idxG] != gatelist.circuit[idxG]){
                 cout << "at index " << idxG << endl;

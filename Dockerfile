@@ -33,14 +33,5 @@ RUN apt-get update && apt-get install -y \
 WORKDIR ${HOME_DIR}
 COPY . .
 
-# Build and compile C++ files
-WORKDIR ${HOME_DIR}/Trillium/src/cpp_compiler
-RUN cmake . 
-RUN make
-
-# Install Trillium package
-WORKDIR ${HOME_DIR}
-RUN pip install -e .
-
 WORKDIR ${HOME_DIR}/Trillium
 

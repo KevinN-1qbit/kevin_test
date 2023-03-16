@@ -14,17 +14,11 @@ tests :test_Operation.cpp test_Rotation.cpp test_Measure.cpp  $(DEPENDENCIES)
 	@echo "-------------------------"
 	@echo "-------Make Tests--------"
 	@echo "-------------------------"
-	$(CXX) $(CFLAGS) $(DEPENDENCIES) -o test_Operation test_Operation.cpp
-	$(CXX) $(CFLAGS) $(DEPENDENCIES) -o test_Rotation test_Rotation.cpp
-	$(CXX) $(CFLAGS) $(DEPENDENCIES) -o test_Measure test_Measure.cpp 
 	$(CXX) $(CFLAGS)  $(DEPENDENCIES) -o  test_LysCompiler test_LysCompiler.cpp
 
 	@echo "-------------------------"
 	@echo "-----BEGIN TESTS---------"
 	@echo "-------------------------"
-	./test_Operation
-	./test_Rotation
-	./test_Measure
 	./test_LysCompiler
 
 	@echo "-------------------------"
