@@ -4,13 +4,6 @@
 #include <cmath>
 using namespace std;
 
-
-// helper functions to print the content
-//auto ToStrVisitor = []( auto t) { std::cout << t.toStr() << "\n"; };
-//void toStrVariantVec(vector<unique_ptr<Operation>> &gateVec) {
-//        for (int i=0; i < gateVec.size(); i++) std::visit(ToStrVisitor, gateVec[i]);
-//}
-
  LysCompiler::LysCompiler(vector<shared_ptr<Operation>> encoded_circuit){
      // Guard against empty input
      if (encoded_circuit.size() == 0) throw std::invalid_argument("Input circuit must have at least one element");
@@ -24,35 +17,20 @@ using namespace std;
      this->ancillaBegin = ancillaBegin;
  };
 
-// LysCompiler::LysCompiler(int numDefaultMeasurements, vector<Gate> encoded_circuit, int ancillaBegin){
-
-//     this->circuit = encoded_circuit;
-//     vector<char> emptyc = {};
-//     vector<Measure> measurement = vector<Measure>(numDefaultMeasurements,Measure(true,emptyc,{}));
-//     for(int indexQubit = 0 ; indexQubit < numDefaultMeasurements ; ++indexQubit){
-//         measurement[indexQubit].zBasis = pow(2,numQubits-1-indexQubit);
-//     }
-//     this->circuit.insert(this->circuit.end(),measurement.begin(),measurement.end());
-//     this->ancillaBegin = ancillaBegin;
-// };
 
 LysCompiler::LysCompiler(int numDefaultMeasurements, vector<shared_ptr<Operation>> encoded_circuit){
     // Guard against empty input
     if (encoded_circuit.size() == 0) throw std::invalid_argument("Input circuit must have at least one element");
 
-    //    this->circuit = move(encoded_circuit);
     for(auto& rot : encoded_circuit) {
         this->circuit.push_back(std::move(rot));
     }
-    //    circuit(move(encoded_circuit));
     vector<char> emptyc = {};
     Measure tempMeasure;
-    //    vector<Measure> measurement = vector<Measure>(numDefaultMeasurements, Measure(true, emptyc, {})); // default measure in Z on all qubits
     vector<shared_ptr<Operation>> pMeasurement;
     for(int indexQubit = 0 ; indexQubit < numDefaultMeasurements ; ++indexQubit){
         tempMeasure = Measure(true, emptyc, {});
         tempMeasure.zBasis = pow(2,numQubits-1-indexQubit);
-        //        shared_ptr<Measure> pMTemptempMeasure;
         pMeasurement.emplace_back(make_shared<Measure>(tempMeasure));
     }
 
@@ -60,15 +38,6 @@ LysCompiler::LysCompiler(int numDefaultMeasurements, vector<shared_ptr<Operation
 
 };
 
-//Cast gate to operation
-//Operation gateToOp(Gate gate){
-//    if (gate.index()==0){
-//        return get<Rotation>(gate);
-//    }
-//    else{
-//        return get<Measure>(gate);
-//    }
-//}
 
  pair<bool,vector<Rotation> > LysCompiler::combineRotation(Rotation R11, Rotation R22){
 
@@ -157,11 +126,9 @@ LysCompiler::LysCompiler(int numDefaultMeasurements, vector<shared_ptr<Operation
      if (R11->isRotation() && R22->isRotation()) {
          pair<bool,vector<Rotation>> res = combineRotation(*static_pointer_cast<Rotation>(R11),*static_pointer_cast<Rotation>(R22));
          result.first = res.first;
-//         vector<shared_ptr<Rotation>> combinedRot;
          for (int i=0; i < (int)res.second.size(); i++){
              result.second.emplace_back(make_shared<Rotation>(res.second[i]));
          }
-//         result.second = vector<shared_ptr<Rotation>>(combinedRot.begin(),combinedRot.end());
      }
      else {
          vector<shared_ptr<Operation>> gates = {R11,R22};
@@ -366,17 +333,6 @@ Measure LysCompiler::applyCommutation(Rotation R1, Measure M1) {
 }
 
 
-//Rotation LysCompiler::applyCommutation(Operation gate, Rotation tGate){
-//    if(gate.isRotation()){
-//        return applyCommutation(static_cast<Rotation>(gate),tGate);
-//    }
-//    else {
-//        throw invalid_argument( "Can't push anything through a Measure" );
-//        // return applyCommutation(get<Measure>(gate),tGate);
-//    }
-//}
-
-
 void LysCompiler::pushTForwardThread(vector<shared_ptr<Operation>> & flattenGates, int beginIndex, int endIndex, vector<int> &threadSplitIndices, int threadOrderIndex){
 
     //base case the flattenGates is empty
@@ -462,8 +418,7 @@ vector<int> LysCompiler::implementationPushTForward(vector<shared_ptr<Operation>
     int subVectorLength = (subsetEnd - begin) / numThreads;
     std::thread threadsVector[numThreads];
 
-//    start each thread
-
+    //    start each thread
     for(int idxThread = 0 ; idxThread < numThreads - 1 ; ++idxThread) {
         end = begin + subVectorLength ;
         //        flattenGates[end]
@@ -494,10 +449,6 @@ int LysCompiler::pushTForward(vector<shared_ptr<Operation>> &  flattenGates){
 
     pair<vector<shared_ptr<Operation>>, vector<shared_ptr<Operation>>> forwardedGates ;  //output
 
-    //    //if the input is empty, return two empty list
-    //    if((int)flattenGates.size() == 0)
-    //        return forwardedGates;
-
     //variable for the threads:
     //  -first element : index at which the threads start (inclusive)
     //  -second element : index at which the threads end (exclusive)
@@ -512,19 +463,6 @@ int LysCompiler::pushTForward(vector<shared_ptr<Operation>> &  flattenGates){
 
     //final run
     resultItr = this->implementationPushTForward(flattenGates,1,resultItr[0],resultItr[1]);
-
-//    for(int gateIdx = 0 ; gateIdx < resultItr[0] ; ++gateIdx){
-//        shared_ptr<Rotation> pRR = static_pointer_cast<Rotation>(this->circuit[gateIdx]);
-//        assert (std::abs(pRR->angle)==1);
-//    }
-//    int cirEnd = size(this->circuit);
-//    for(int gateIdx = resultItr[0] ; gateIdx < (cirEnd-numQubits) ; ++gateIdx){
-//        shared_ptr<Rotation> pRR = static_pointer_cast<Rotation>(this->circuit[gateIdx]);
-//        assert (std::abs(pRR->angle)==2);
-//    }
-
-    //    cout<<"";
-    //    forwardedGates = make_pair(make_move_iterator(flattenGates.begin()), make_move_iterator(flattenGates.begin() + resultItr[0]), (make_move_iterator(flattenGates.begin() + resultItr[0]), make_move_iterator(flattenGates.end())));
 
     return resultItr[0];
 }
@@ -565,7 +503,6 @@ void LysCompiler::reduceLayerGreedyAlgoThread(vector<vector<shared_ptr<Operation
                     shared_ptr<Rotation> nextLayerGate;
                     if (nextLayer[nextLayerGateIndex]->isRotation()) {
                         // if the next element is a Rotation, proceed normally
-//                        nextLayerGate = get<Rotation>(nextLayer[nextLayerGateIndex]);
                         nextLayerGate = static_pointer_cast<Rotation>(nextLayer[nextLayerGateIndex]);
                     }
                     else{
@@ -694,20 +631,11 @@ vector<vector<shared_ptr<Operation>>> LysCompiler::reduceLayerGreedyAlgo(vector<
         reduceLayerGreedyAlgoThread(circuitLayers, change);
     }
 
-//    for (int layer=0; layer < (int)circuitLayers.size(); layer++){
-//        for (int g1Idx=0; g1Idx < (int)circuitLayers[layer].size(); g1Idx++){
-//            for (int g2Idx=g1Idx+1; g2Idx < (int)circuitLayers[layer].size(); g2Idx++){
-//                assert (circuitLayers[layer][g1Idx]->isCommute(*circuitLayers[layer][g2Idx]));
-//            }
-//        }
-//    }
-
     return circuitLayers;
 }
 
 
 int LysCompiler::optimizeRotation(){
-    //    vector<Gate> pushedBackNonT = {}; // this is the vector of commuted non T gates at the end of the circuit
     bool changedFlag = true;
     int numOfTgates = 0;
     vector<shared_ptr<Operation>> pushedBackNonT;
@@ -716,29 +644,11 @@ int LysCompiler::optimizeRotation(){
         changedFlag = false;
 
         //step 1. Push all T gates in the circuit to the beginning of the circuit
-        //    pair<vector<unique_ptr<Operation>>, vector<unique_ptr<Operation>>> pushedForwardGates = this->pushTForward(this->circuit);
-        //    vector<unique_ptr<Operation>> tgates = pushedForwardGates.first;
-        //    vector<unique_ptr<Operation>> nonTgates = pushedForwardGates.second;
         numOfTgates = this->pushTForward(this->circuit);
-//        for (int i = 0; i < numOfTgates; i++){
-//            assert (std::abs(this->circuit[i]->angle)==1);
-//        }
-//        for(int gateIdx = 0 ; gateIdx < numOfTgates ; ++gateIdx){
-//            shared_ptr<Rotation> pRR = static_pointer_cast<Rotation>(this->circuit[gateIdx]);
-//            assert (std::abs(pRR->angle)==1);
-//        }
-//        int cirEnd = size(this->circuit);
-//        for(int gateIdx = numOfTgates ; gateIdx < (cirEnd-numQubits) ; ++gateIdx){
-//            shared_ptr<Rotation> pRR = static_pointer_cast<Rotation>(this->circuit[gateIdx]);
-//            assert (std::abs(pRR->angle)==2);
-//        }
-        vector<shared_ptr<Operation>> tgates (this->circuit.begin(), this->circuit.begin() + numOfTgates);
-        pushedBackNonT.insert(pushedBackNonT.begin(), this->circuit.begin() + numOfTgates, this->circuit.end());
-
 
         // all nonT are in pushedBackNonT (no T gates). Each round, the new nonTgates comes from the previous section of T+nonT mixsure and therefore, we must insert at the beginning of pushedBackNonT
-        //        pushedBackNonT.insert(pushedBackNonT.begin(), nonTgates.begin(), nonTgates.end());
-
+        vector<shared_ptr<Operation>> tgates (this->circuit.begin(), this->circuit.begin() + numOfTgates);
+        pushedBackNonT.insert(pushedBackNonT.begin(), this->circuit.begin() + numOfTgates, this->circuit.end());
 
         //step 2. Reduce the T gates layers by partitioning them into layers where all T gates mutually commute within the same layer
         vector<vector<shared_ptr<Operation>> > reduced_T_Layers = this->reduceLayerGreedyAlgo(tgates);
@@ -755,7 +665,6 @@ int LysCompiler::optimizeRotation(){
         for(vector<shared_ptr<Operation>> layer : reduced_T_Layers)
             this->circuit.insert(this->circuit.end(), layer.begin(), layer.end());
     }
-//    vector<shared_ptr<Operation>> pushedBackNonT (this->circuit.begin() + numOfTgates, this->circuit.end());
 
     //step 5
 
@@ -773,7 +682,6 @@ int LysCompiler::optimizeRotation(){
     numOfTgates = this->circuit.size();
 
     // //return t and nont separately.
-    // pair<vector<Gate>,vector<Gate>> t_nonT_pair = make_pair(this->circuit, vector<Gate>(pushedBackNonT.begin(), pushedBackNonT.end()));
 
     // Insert the pushed back nonT gates at the end of the circuit
     this->circuit.insert(this->circuit.end(), pushedBackNonT.begin(), pushedBackNonT.end());
@@ -793,7 +701,6 @@ int LysCompiler::RearrangeCliffordGates(int idxOfTGates,int idxLastRotation){
     // look how many 1Qubit rotations are already at the end
     for (int idx = idxLastRotation; idx > idxOfTGates ; idx = idx - 1){
         pOper = this->circuit[idx];
-        //         op = *pOper;
         if (pOper->isSingleQubit()){
             start_idx_single_qubit = start_idx_single_qubit - 1;
         }
@@ -805,16 +712,13 @@ int LysCompiler::RearrangeCliffordGates(int idxOfTGates,int idxLastRotation){
     // Push the 1qubit rotations to the end of the circuit if they commute
     // or stop when the do not commute anymore
     for (int current_clifford_idx = start_idx_single_qubit-2 ; current_clifford_idx > idxOfTGates ; current_clifford_idx = current_clifford_idx - 1 ){
-        //         Gate current_cliff = this->circuit[current_clifford_idx] ;   //First rotation to check
         shared_ptr<Operation> pCurrent_cliff = this->circuit[current_clifford_idx] ;   //First rotation to check
         bool commuteToTheEnd = true ;                               //Did it commute all the way?
         //Is the first rotation a 1 qubit rotation ?
-        //         op = gateToOp(current_cliff);
         if(pCurrent_cliff->isSingleQubit()){
             int current_clifford_idx_dynamic = current_clifford_idx ;
             while(current_clifford_idx_dynamic < start_idx_single_qubit - 1){   //permute it with the next one if they commute
                 shared_ptr<Operation> pNext_cliff = this->circuit[current_clifford_idx_dynamic + 1];
-                //                 Operation op2 = gateToOp(next_cliff);
                 if (pCurrent_cliff->isCommute(*pNext_cliff)){
                     this->circuit[current_clifford_idx_dynamic] = pNext_cliff ;
                     current_clifford_idx_dynamic = current_clifford_idx_dynamic + 1;
@@ -909,12 +813,12 @@ int LysCompiler::basis_permutation(int numOfTGates) {
         if (doSomething){
             for(int idxM = idxGate+1 ; idxM <= idxLastM ; idxM++ ){
                 shared_ptr<Operation> pM = this->circuit[idxM];
-                //                 Operation M = gateToOp(this->circuit[idxM]);
+
                 // variable mask only shows which qubits are measured for the current measure M at index idxM
                 // e.g. 001 means measuring the 0th and 1st qubit, not measuring the 2nd qubit
                 bitset<numQubits> mask_reverse = ~(pM->xBasis | pM->zBasis); // 0s shows the qubits which are measured
 
-                //Can it be absorbed ? If it anticommutes with R, change list_of_measurements
+                // Can it be absorbed ? If it anticommutes with R, change list_of_measurements
                 // otherwise the measurement commutes with the rotation; do nothing (ignore the rotation)
                 if (!R.isCommute(*pM)){ // if M is a R, still holds
                     if(!this->circuit[idxM]->isRotation()) {
@@ -951,7 +855,6 @@ int LysCompiler::basis_permutation(int numOfTGates) {
                 // cout << " Checking block == a" << endl;
                 if ((maskAncilla & (R.xBasis | R.zBasis) & maskOverall) == (maskAncilla & (R.xBasis | R.zBasis))) {
                     // we erase the R
-                    // cout << " Checking should erase" << endl;
                     this->circuit.erase(this->circuit.begin() + idxR);
                     idxLastM--;
                     moveAfterMeasure = false;
@@ -979,13 +882,9 @@ int LysCompiler::basis_permutation(int numOfTGates) {
 
 pair<vector<vector<shared_ptr<Operation>>>,int> LysCompiler::runLysCompiler(bool combine, bool layer){
     //reduce gate count
-    // std::pair<std::vector<Gate>, std::vector<Gate>> tAndNonT = this->optimizeRotation();
     auto startTime1 = chrono::system_clock::now();
     int numOfTgates = this->optimizeRotation();
 
-
-    // // int startingIdxToRemoveAfterMeasure = this->circuit.size(); // Remove all gates from this index (inclusive) till the end of the array
-    // int startingIdxToRemoveAfterMeasure = this->circuit.size(); // Remove all gates from this index (inclusive) till the end of the array
     int startingIdxToRemoveAfterMeasure;
     if (combine){
         int numOfCommutedCliffords = this->basis_permutation(numOfTgates);
@@ -1002,10 +901,6 @@ pair<vector<vector<shared_ptr<Operation>>>,int> LysCompiler::runLysCompiler(bool
     cout << "Total gates: " << (int)size(this->circuit) << "\n";
     cout << "T gates: " << numOfTgates << "\n";
     cout << "Remove after measure: " << startingIdxToRemoveAfterMeasure << "\n";
-
-    // if (layer){
-    //     layerC = reduceLayerGreedyAlgo(this->circuit);
-    // }
 
     return make_pair(layerC, startingIdxToRemoveAfterMeasure);
 }

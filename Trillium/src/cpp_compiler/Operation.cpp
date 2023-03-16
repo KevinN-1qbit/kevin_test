@@ -67,43 +67,9 @@ bool Operation::isRotation(){
     return false;
 }
 
-//std::string Bitset2StringX(const Operation op){
-//    return op.xBasis.to_string();
-//}
-//
-//std::string Bitset2StringZ(const Operation op){
-//    return op.zBasis.to_string();
-//}
-
 std::string Operation::Print(){
     string numQubitsStr = "numQubits: " + to_string(numQubits) + "\n";
     string xBasisStr = "xBasis: " + this->xBasis.to_string() + " as binary." + "\n";
     string zBasisStr = "zBasis: " + this->zBasis.to_string() + " as binary." + "\n";
     return numQubitsStr + xBasisStr + zBasisStr;
 }
-
-//string Operation::toStr(){
-//
-//    string rotation_str ;
-//    string x = this->xBasis.to_string();
-//    string z = this->zBasis.to_string();
-//    for (int i = 0 ; i < numQubits ; i++ ){
-//        if (x[i]=='1' & z[i]=='0'){
-//            rotation_str += 'X';
-//        }
-//        else if (x[i]=='0' & z[i]=='1'){
-//            rotation_str += 'Z';
-//        }
-//        else if (x[i]=='1' & z[i]=='1'){
-//            rotation_str += 'Y';
-//        }
-//        else if (x[i]=='0' & z[i]=='0'){
-//            rotation_str += 'I';
-//        }
-//        else {
-//            cout << "errror\n" ;
-//        }
-//    }
-//
-//    return "R" + rotation_str + "\n";
-//}

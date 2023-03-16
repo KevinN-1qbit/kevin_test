@@ -11,7 +11,6 @@ Rotation::Rotation(int angle, bitset<numQubits> xBasis, bitset<numQubits> zBasis
 }
 
 Rotation::Rotation(int angle, vector<char> basis, vector<int> qubits){
-//    Operation newOp = Operation(basis,qubits);
     this->angle = angle;
     if(basis.size() != qubits.size())   /// Basis and Qubits vectors must be of the same size.
         throw invalid_argument( "Illegal declaration. Number of basis and number of qubits must be equal and the qubits must be unique." );
