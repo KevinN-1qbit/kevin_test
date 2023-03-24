@@ -26,7 +26,7 @@ This should produce a txt output file result of the transpiled circuit within th
 
 Heres a simple command you can use to test out the transpiler. Make sure to replace {PWD} with the current directory path 
 
-```make transpiler transpiled_circuit_path={PWD}/data/output input={PWD}/Trillium/data/input/test_circuits/qasm_test_10_lines.qasm language=qasm recompile=False epsilon=1```
+```make transpiler transpiled_circuit_path=$(pwd)/Trillium/data/output input=$(pwd)/Trillium/data/input/test_circuits/qasm_test_10_lines.qasm language=qasm recompile=False epsilon=1```
 
 * Important Note: File paths should be the absolute path to the file to ensure proper volume mounting
 
