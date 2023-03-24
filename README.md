@@ -22,9 +22,11 @@ List of Command Arguments for the Transpiler:
 | recompile (optional)     | Choose whether to recompile the cpp source code. Default is False|
 | epsilon (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
 
-This should produce a txt output file result of the transpiled circuit within the provided ```circuit_path```
+This should produce a txt output file result of the transpiled circuit within the provided ```transpiled_circuit_path```
 
-Example command: ```make transpiler transpiled_circuit_path={TRANSPILEDCIRCUITPATH} input={INPUT} language={LANGUAGE} combine={COMBINE} recompile={RECOMPILE} epsilon={EPSILON}```
+Heres a simple command you can use to test out the transpiler.
+
+```make transpiler transpiled_circuit_path=$(pwd)/Trillium/data/output input=$(pwd)/Trillium/data/input/test_circuits/qasm_test_10_lines.qasm language=qasm recompile=False epsilon=1```
 
 * Important Note: File paths should be the absolute path to the file to ensure proper volume mounting
 
