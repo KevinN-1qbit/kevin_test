@@ -24,7 +24,7 @@ List of Command Arguments for the Transpiler:
 
 This should produce a txt output file result of the transpiled circuit within the provided ```transpiled_circuit_path```
 
-Heres a simple command you can use to test out the transpiler. Make sure to replace {PWD} with the current directory path 
+Heres a simple command you can use to test out the transpiler.
 
 ```make transpiler transpiled_circuit_path=$(pwd)/Trillium/data/output input=$(pwd)/Trillium/data/input/test_circuits/qasm_test_10_lines.qasm language=qasm recompile=False epsilon=1```
 
