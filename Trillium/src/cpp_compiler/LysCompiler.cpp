@@ -126,9 +126,7 @@ LysCompiler::LysCompiler(int numDefaultMeasurements, vector<shared_ptr<Operation
 
      // TODO isRotation is always returning false since its checking a Operation object which always returns false
      // Bug FIX
-     cout << "testing" << endl;
-     cout << R11->isRotation() << endl;
-     if (true) {
+     if (R11->isRotation() && R22->isRotation()) {
          pair<bool,vector<Rotation>> res = combineRotation(*static_pointer_cast<Rotation>(R11),*static_pointer_cast<Rotation>(R22));
          result.first = res.first;
          for (int i=0; i < (int)res.second.size(); i++){
