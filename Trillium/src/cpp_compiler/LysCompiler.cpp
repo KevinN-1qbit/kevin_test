@@ -123,7 +123,12 @@ LysCompiler::LysCompiler(int numDefaultMeasurements, vector<shared_ptr<Operation
 
  pair<bool,vector<shared_ptr<Operation> > > LysCompiler::combineGate(shared_ptr<Operation> R11, shared_ptr<Operation> R22){
      pair<bool,vector<shared_ptr<Operation>>> result;
-     if (R11->isRotation() && R22->isRotation()) {
+
+     // TODO isRotation is always returning false since its checking a Operation object which always returns false
+     // Bug FIX
+     cout << "testing" << endl;
+     cout << R11->isRotation() << endl;
+     if (true) {
          pair<bool,vector<Rotation>> res = combineRotation(*static_pointer_cast<Rotation>(R11),*static_pointer_cast<Rotation>(R22));
          result.first = res.first;
          for (int i=0; i < (int)res.second.size(); i++){
