@@ -1,24 +1,26 @@
-BUILD_ARGS_TAG 	= latest
+# Docker configs
+VERSION 		?= latest
+HOME_DIR		?= /workspace/Trillium
 
 # Default Transpiler configs
-combine 		= True
-recompile 		= False
-epsilon			= 1e-10	
+LANGUAGE 		?= qasm
+COMBINE 		?= True
+RECOMPILE 		?= False
+EPSILON			?= 1e-10
 
 # Build docker image
 .PHONY: build
 build:
-	docker build . -t quay.io/1qbit/hansa:${BUILD_ARGS_TAG} -f Dockerfile
+	docker build . -t quay.io/1qbit/hansa:transpiler -f Dockerfile
 
 # Push image to repo
 .PHONY: push
 push:
-	docker push quay.io/1qbit/hansa:${BUILD_ARGS_TAG}
+	docker push quay.io/1qbit/hansa:transpiler
 
-# Pull image and build transpiled circuit
+# Run transpiler
 .PHONY: transpiler
 transpiler:
-	docker build . -t quay.io/1qbit/hansa:${BUILD_ARGS_TAG} -f Dockerfile
-	docker run -v ${transpiled_circuit_path}:/workspace/Trillium/data/output -v $(input):/workspace/Trillium/input$(input) \
-	quay.io/1qbit/hansa:${BUILD_ARGS_TAG} bash -c \
-	"python3 lys.py -input /workspace/Trillium/input$(input) -language $(language) -combine $(combine) -recompile $(recompile) -epsilon $(epsilon)" 
+	docker run -v $(INPUT_CIRCUIT):$(HOME_DIR)/data/$(INPUT_CIRCUIT) -v ${OUTPUT_DIR}:$(HOME_DIR)/data/output \
+	quay.io/1qbit/hansa:transpiler bash -c \
+	"python3 lys.py -input $(HOME_DIR)/data/$(INPUT_CIRCUIT) -language $(LANGUAGE) -combine $(COMBINE) -recompile $(RECOMPILE) -epsilon $(EPSILON)" 

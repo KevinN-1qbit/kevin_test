@@ -43,4 +43,3 @@ WORKDIR ${HOME_DIR}
 RUN pip install -e .
 
 WORKDIR ${HOME_DIR}/Trillium
-

@@ -2,14 +2,11 @@
 
 Source code for the Lys compiler. 
 
-# Using Docker to Create the transpiled circuit:
+# Using Docker to create a transpiled circuit:
 
-There is a docker image with all the required dependencies installed. You can run the transpiler
-with a simple make command
+There is a docker image with all the required dependencies installed. You can run the transpiler with a simple make command
 
-```make transpiler transpiled_circuit_path (lys.py cmdargs) ```
-
-circuit_path should be the directory where you would like the transpiled circuit to be written to
+```make transpiler (lys.py cmdargs) ```
 
 List of Command Arguments for the Transpiler:
 
@@ -22,13 +19,20 @@ List of Command Arguments for the Transpiler:
 | recompile (optional)     | Choose whether to recompile the cpp source code. Default is False|
 | epsilon (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
 
-This should produce a txt output file result of the transpiled circuit within the provided ```transpiled_circuit_path```
+This should produce a `.txt` output file of the transpiled circuit in the provided `OUTPUT_DIR`.
 
 Heres a simple command you can use to test out the transpiler.
 
-```make transpiler transpiled_circuit_path=$(pwd)/Trillium/data/output input=$(pwd)/Trillium/data/input/test_circuits/qasm_test_10_lines.qasm language=qasm recompile=False epsilon=1```
+```
+make transpiler \
+	INPUT_CIRCUIT=$(pwd)/Trillium/data/input/test_circuits/qasm_test_10_lines.qasm \
+ 	OUTPUT_DIR=$(pwd)/output \
+	LANGUAGE=qasm \
+	RECOMPILE=False \
+	EPSILON=1
+```
 
-* Important Note: File paths should be the absolute path to the file to ensure proper volume mounting
+* Important Note: File paths should be absolute to ensure proper volume mounting
 
 # Getting started Local Development:
 
