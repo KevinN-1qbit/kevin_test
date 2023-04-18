@@ -37,6 +37,10 @@ def parse_args():
     cmd_parser.add_argument("-input", action="store", type=str, metavar="",
                             help="Path to the input circuit file")
 
+    cmd_parser.add_argument("-output_filename", action="store", type=str, metavar="",
+                            help="Filename for output transpiled circuit",
+                            default="")
+
     cmd_parser.add_argument("-combine", action="store",
                             type=is_bool, metavar="",
                             help="Choose whether to combine the non-T "
@@ -118,12 +122,17 @@ def get_compiled_circuit(
 
     # Write output to a file
     output_path = "data/output/"
+    pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
+
     # pylint: disable=unused-variable
     input_path, input_extension = osp.splitext(file)
     input_name = input_path.split("/")[-1]
-    output_name = output_path + "Compiled_" + input_name + "_" \
-                  + time.strftime("%Y%m%d-%H-%M", time.localtime()) + ".txt"
-    pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
+
+    if cfg["output_filename"]:
+        output_name = output_path + cfg["output_filename"]
+    else:
+        output_name = output_path + "Compiled_" + input_name + "_" \
+            + time.strftime("%Y%m%d-%H-%M", time.localtime()) + ".txt"
 
     with open(output_name, "w") as output_file:
         for line in compiled_circuit:
@@ -156,18 +165,20 @@ def main(cfg: dict) -> None:
 def get_parser_and_circuit_input(cfg: dict):
     parser_dict = {"qasm": parse.ParseQasm, "projectq": parse.ParseProjectQ}
     chosen_parser = parser_dict[cfg["language"]]
-    circuit_input: str = cfg["input_file"]
+    circuit_input: str = cfg["input"]
     return chosen_parser, circuit_input
 
 
 def get_cfg() -> dict:
     args = parse_args()
-
-    config = {"input_file": args.input,
-              "language": args.language,
-              "combine": args.combine,
-              "recompile_cpp": args.recompile,
-              "epsilon": args.epsilon}
+    config = {
+                "input": args.input,
+                "output_filename": args.output_filename,
+                "language": args.language,
+                "combine": args.combine,
+                "recompile_cpp": args.recompile,
+                "epsilon": args.epsilon
+            }
     return config
 
 

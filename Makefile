@@ -21,6 +21,10 @@ push:
 # Run transpiler
 .PHONY: transpiler
 transpiler:
-	docker run -v $(INPUT_CIRCUIT):$(HOME_DIR)/data/$(INPUT_CIRCUIT) -v ${OUTPUT_DIR}:$(HOME_DIR)/data/output \
-	quay.io/1qbit/hansa:transpiler bash -c \
-	"python3 lys.py -input $(HOME_DIR)/data/$(INPUT_CIRCUIT) -language $(LANGUAGE) -combine $(COMBINE) -recompile $(RECOMPILE) -epsilon $(EPSILON)" 
+	docker run -v $(INPUT_CIRCUIT):$(HOME_DIR)/data/$(INPUT_CIRCUIT) \
+		-v ${OUTPUT_DIR}:$(HOME_DIR)/data/output \
+		quay.io/1qbit/hansa:transpiler bash -c \
+		"python3 lys.py -input $(HOME_DIR)/data/$(INPUT_CIRCUIT) \
+		-output_filename ${OUTPUT_FILENAME} \
+		-language $(LANGUAGE) -combine $(COMBINE) \
+		-recompile $(RECOMPILE) -epsilon $(EPSILON)"

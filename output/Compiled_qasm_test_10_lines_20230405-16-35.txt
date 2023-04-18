@@ -1,6 +1,0 @@
-Rotate 1: IIZ
-Rotate 1: IZI
-Rotate 1: XII
-Measure +: XII
-Measure +: XZI
-Measure +: IZZ
