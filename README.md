@@ -16,29 +16,29 @@ Then run the transpiler command to generate a transpiled circuit
 
 ```
 make transpiler \
-	INPUT_CIRCUIT=$(pwd)/Trillium/data/input/test_circuits/qasm_test_10_lines.qasm \
- 	OUTPUT_DIR=$(pwd)/output \
- 	OUTPUT_FILENAME=t_circuit.txt \
-	LANGUAGE=qasm \
-	RECOMPILE=False \
-	EPSILON=1
+    INPUT_CIRCUIT=$(pwd)/data/input/qasm_test_100_lines.qasm \
+    OUTPUT_DIR=$(pwd)/data/output \
+    OUTPUT_FILENAME=transpiled_circuit.txt \
+    EPSILON=1
 ```
 
-This should produce a `t_circuit.txt` in your `output` folder.
+This should produce a `transpiled_circuit.txt` in your `output` folder.
+
+* Important Note: File paths should be absolute to ensure proper volume mounting
+
 
 List of Command Arguments for the Transpiler:
 
 
-| Paramter                | URL                                                              |
+| Parameter                | URL                                                              |
 |------------------------ | --------------------------------------------------------------   |
 | INPUT_CIRCUIT           | Absolute path to the input circuit file.                         |
+| OUPUT_DIR               | Output directory                                                 |
+| OUTPUT_FILENAME         | Name of output transpiled circuit                                |
 | LANGUAGE                | Choose the language of the circuit file. [qasm, projectq]        |
 | COMBINE (optional)      | Choose whether to combine the non-T rotations with measurement. Default is True|
 | RECOMPILE (optional)    | Choose whether to recompile the cpp source code. Default is False|
 | EPSILON (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
-
-
-* Important Note: File paths should be absolute to ensure proper volume mounting
 
 
 # [OUTDATED] Getting started Local Development:

@@ -7,5 +7,4 @@ Trillium/src/cpp_compiler/runLysCompiler.so
 
 Lys.egg-info/
 
-Trillium/data/output
-output
+data/output/*
