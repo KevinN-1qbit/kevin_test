@@ -134,7 +134,7 @@ def get_compiled_circuit(
         output_name = output_path + "Compiled_" + input_name + "_" \
             + time.strftime("%Y%m%d-%H-%M", time.localtime()) + ".txt"
 
-    with open(output_name, "w") as output_file:
+    with open(output_name, "w+") as output_file:
         for line in compiled_circuit:
             output_file.writelines(str(line) + "\n")
 
