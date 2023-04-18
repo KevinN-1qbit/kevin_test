@@ -22,7 +22,7 @@ make transpiler \
     EPSILON=1
 ```
 
-This should produce a `transpiled_circuit.txt` in your `output` folder.
+This should produce a `transpiled_circuit.txt` in your `OUTPUT_DIR` folder.
 
 * Important Note: File paths should be absolute to ensure proper volume mounting
 
