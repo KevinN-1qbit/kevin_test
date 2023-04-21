@@ -10,7 +10,6 @@ import multiprocessing
 
 from Trillium.utils import parse
 
-
 def is_bool(value: str) -> bool:
     """ Checks if the input is a string representing a boolean value """
     value = value.lower()
@@ -120,24 +119,29 @@ def get_compiled_circuit(
     elif cfg["language"] == "qasm":
         compiled_circuit = compiler.run_no_layer(cfg["language"], combine)
 
-    # Write output to a file
-    output_path = "data/output/"
-    pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
-
     # pylint: disable=unused-variable
     input_path, input_extension = osp.splitext(file)
     input_name = input_path.split("/")[-1]
 
     if cfg["output_filename"]:
-        output_name = output_path + cfg["output_filename"]
+        output_name = cfg["output_filename"]
     else:
+        output_path = "data/output/"
+        pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
         output_name = output_path + "Compiled_" + input_name + "_" \
             + time.strftime("%Y%m%d-%H-%M", time.localtime()) + ".txt"
 
-    with open(output_name, "w+") as output_file:
-        for line in compiled_circuit:
-            output_file.writelines(str(line) + "\n")
-
+    for i in range(5):
+        try:
+            with open(output_name, "w") as output_file:
+                for line in compiled_circuit:
+                    output_file.writelines(str(line) + "\n")
+            print(f"Successfully wrote to {output_name} on attempt {i+1}")
+            return
+        except (FileNotFoundError, PermissionError) as e:
+            print(f"Attempt {i+1} failed: {e}")
+            time.sleep(1)
+    print(f"All attempts to write to {output_name} have failed.")
 
 def main(cfg: dict) -> None:
     chosen_parser, circuit_input = get_parser_and_circuit_input(cfg)
