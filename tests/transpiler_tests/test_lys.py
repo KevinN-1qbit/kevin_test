@@ -4,8 +4,8 @@ from typing import Literal, Any
 
 from pytest import mark
 
-import Trillium.lys as m
-from Trillium.utils import paths
+import src.lys as m
+from utils import paths
 
 _Language = Literal["qasm", "projectq"]
 

@@ -34,12 +34,12 @@ WORKDIR ${HOME_DIR}
 COPY . .
 
 # Build and compile C++ files
-WORKDIR ${HOME_DIR}/Trillium/src/cpp_compiler
+WORKDIR ${HOME_DIR}/src/cpp_compiler
 RUN cmake . 
 RUN make
 
-# Install Trillium package
+# Install package
 WORKDIR ${HOME_DIR}
 RUN pip install -e .
 
-WORKDIR ${HOME_DIR}/Trillium
+WORKDIR ${HOME_DIR}

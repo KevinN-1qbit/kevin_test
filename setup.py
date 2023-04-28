@@ -5,11 +5,11 @@ setup(
     # version='0.0.0',
     # author='',
     # author_email='',
-    packages='Trillium'.split(),
+    # packages='Trillium'.split(),
     # license='',
     # description='',
     long_description=open('README.md').read(),
     install_requires=[
-        # "pytest",  # For testing
+         "pytest",  # For testing
     ],
 )

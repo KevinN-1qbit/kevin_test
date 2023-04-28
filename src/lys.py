@@ -8,7 +8,7 @@ import time
 import pathlib
 import multiprocessing
 
-from Trillium.utils import parse
+from utils import parse
 
 def is_bool(value: str) -> bool:
     """ Checks if the input is a string representing a boolean value """
@@ -108,7 +108,7 @@ def get_compiled_circuit(
     # we are reimporting the c++ functions so that
     # we don't use the one's with the old number of qubits.
     # pylint: disable=import-outside-toplevel
-    from Trillium.src.python_wrapper.LysCompiler_cpp_interface import LysCompiler
+    from src.python_wrapper.LysCompiler_cpp_interface import LysCompiler
 
     compiled_circuit = []  # variable to hold the compiled circuit
     compiler = LysCompiler(instructions, num_qubits, recompile)

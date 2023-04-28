@@ -4,7 +4,7 @@ import re
 import os.path as osp
 import itertools as it
 
-from Trillium.utils import decompose
+from utils import decompose
 
 
 class Parse:

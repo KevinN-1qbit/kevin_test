@@ -4,8 +4,8 @@ import itertools as it
 
 from pytest import mark
 
-from Trillium.utils import parse as m
-from Trillium.utils import paths
+from utils import parse as m
+from utils import paths
 
 
 # pylint: disable=invalid-name

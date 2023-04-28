@@ -2,7 +2,7 @@
 
 import subprocess
 
-from Trillium.utils import paths
+from utils import paths
 
 
 class Decompose:

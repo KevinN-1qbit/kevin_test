@@ -1,6 +1,6 @@
 # Docker configs
 IMAGE_NAME      ?= quay.io/1qbit/hansa:transpiler
-HOME_DIR		?=/workspace/Trillium
+HOME_DIR		?=/workspace
 VERSION 		?= v0.1
 
 # Default Transpiler configs
@@ -22,10 +22,10 @@ push:
 # Run transpiler
 .PHONY: transpiler
 transpiler:
-	docker run -v $(INPUT_CIRCUIT):$(HOME_DIR)/data$(INPUT_CIRCUIT) \
+	docker run -v $(INPUT_CIRCUIT):$(HOME_DIR)/data/$(INPUT_CIRCUIT) \
 		-v ${OUTPUT_DIR}:$(HOME_DIR)/data/output \
 		${IMAGE_NAME}.${VERSION} bash -c \
-		"python3 lys.py -input $(HOME_DIR)/data$(INPUT_CIRCUIT) \
+		"python3 src/lys.py -input $(HOME_DIR)/data/$(INPUT_CIRCUIT) \
 		-output_filename $(HOME_DIR)/data/output/${OUTPUT_FILENAME} \
 		-language $(LANGUAGE) -combine $(COMBINE) \
 		-recompile $(RECOMPILE) -epsilon $(EPSILON)"
