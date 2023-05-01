@@ -16,7 +16,7 @@ Then run the transpiler command to generate a transpiled circuit
 
 ```
 make transpiler \
-    INPUT_CIRCUIT=$(pwd)/data/input/qasm_test_100_lines.qasm \
+    INPUT_CIRCUIT=$(pwd)/data/input/test_circuits/qasm_test_10_lines.qasm \
     OUTPUT_DIR=$(pwd)/data/output \
     OUTPUT_FILENAME=transpiled_circuit.txt \
     EPSILON=1
