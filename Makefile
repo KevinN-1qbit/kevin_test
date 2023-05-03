@@ -25,7 +25,7 @@ transpiler:
 	docker run -v $(INPUT_CIRCUIT):$(HOME_DIR)/data$(INPUT_CIRCUIT) \
 		-v ${OUTPUT_DIR}:$(HOME_DIR)/data/output \
 		${IMAGE_NAME}.${VERSION} bash -c \
-		"python3 src/lys.py -input $(HOME_DIR)/data$(INPUT_CIRCUIT) \
+		"python3 src/main.py -input $(HOME_DIR)/data$(INPUT_CIRCUIT) \
 		-output_filename $(HOME_DIR)/data/output/${OUTPUT_FILENAME} \
 		-language $(LANGUAGE) -combine $(COMBINE) \
 		-recompile $(RECOMPILE) -epsilon $(EPSILON)"
