@@ -88,12 +88,12 @@ make
 
 This will build and compile the transpiler C++ code
 
-3. From the root folder you can now run the main transpiler code to generate a transpiled circuit file using the `src/lys.py` file.
+3. From the root folder you can now run the main transpiler code to generate a transpiled circuit file using the `src/main.py` file.
 
 Here is an example:
 
 ```
-python3 src/lys.py \
+python3 src/main.py \
     -input data/input/test_circuits/qasm_test_10_lines.qasm \
     -language qasm
 ```
