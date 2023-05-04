@@ -1,10 +1,10 @@
 name: build_images
 
 on:
-  push:
-    branches: 
-      - main
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version Tag'
 
 jobs:
 
@@ -24,16 +24,11 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}    
 
-      - name: Generate tag
-        id: tag-generator
-        run: |
-          sha=${GITHUB_SHA::8}
-          timestamp=$(date +'%Y.%m.%d')
-          echo "::set-output name=BUILD_ID::${timestamp}.${sha}"
 
       - name: Build hansa transpiler image and push it to the Quay registry
         uses: docker/build-push-action@v2
         with:
           file: ./Dockerfile
-          tags: quay.io/1qbit/hansa:transpiler.${{ steps.tag-generator.outputs.BUILD_ID }}
+          tags: quay.io/1qbit/hansa:transpiler.${{ github.event.inputs.version }}
           push: true
+          
