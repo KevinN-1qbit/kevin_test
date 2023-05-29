@@ -1,118 +1,64 @@
-# Kevin Testing testing
+# Overview
 
-# Lys Compiler
-
-Source code for the Lys compiler.
-
-
-# Using Docker to create a transpiled circuit:
-
-There is a docker image with all the required dependencies installed.
-
-First, login to quay so you can pull a pre-built image
-
-```docker login -u="1qbit+hansabot" -p="FSVHKK9U91V24FG49BDV8RXMWKCXTKJK19PHSXYZLNO2DNYE2A6LE8OO84D8JUAL" quay.io ```
-
-
-Then run the transpiler command to generate a transpiled circuit
-
-```
-make transpiler \
-    INPUT_CIRCUIT=$(pwd)/data/input/qasm_test_100_lines.qasm \
-    OUTPUT_DIR=$(pwd)/data/output \
-    OUTPUT_FILENAME=transpiled_circuit.txt \
-    EPSILON=1
-```
-
-This should produce a `transpiled_circuit.txt` in your `OUTPUT_DIR` folder.
-
-* Important Note: File paths should be absolute to ensure proper volume mounting
-
-
-List of Command Arguments for the Transpiler:
-
-
-| Parameter                | URL                                                              |
-|------------------------ | --------------------------------------------------------------   |
-| INPUT_CIRCUIT           | Absolute path to the input circuit file.                         |
-| OUPUT_DIR               | Output directory                                                 |
-| OUTPUT_FILENAME         | Name of output transpiled circuit                                |
-| LANGUAGE                | Choose the language of the circuit file. [qasm, projectq]        |
-| COMBINE (optional)      | Choose whether to combine the non-T rotations with measurement. Default is True|
-| RECOMPILE (optional)    | Choose whether to recompile the cpp source code. Default is False|
-| EPSILON (optional)      | Set the value of decomposition precision. Positive values only. Smaller values give higher precision. Default is 1e-10|
-
-
-# [OUTDATED] Getting started Local Development:
+Source code for the Hansa Compiler.
 
 ## Prerequisites:
-Python 3.8 +
-
-Cpp standard 11+
-
-Boost-python3
-
-CMAKE 3.1.3+
-
-Make tools
-
-Numpy 
-
-## Setting up the environment:
-For MacOS, we recommend you install/update the following prerequisites through Homebrew:
-
-```brew install boost-python3```
-
-```brew install cmake```
-
-```brew install make```
-
-In general, we recommend using a virtual environment for python packages. 
-
-(Optional step) If you choose to use a virtual environment, navigate to where you want to keep your virtual environment and use ```python -m venv name_of_virtual_environment```
-
-(Optional step) Activate the environment by ```source path_to_env/name_of_virtual_env/bin/activate```
-
-Pip install this package by ```pip install -e .``` in the root directory of this repository
+Python (supported version: 3.10)
 
 
-## Usage:
-Before you run the package, first compile the C++ code. We provide two ways to do so. Instructions are in section **Compiling the source code** below.
+## Using Docker to run the compiler:
+There is a docker image with all the required dependencies installed. You can
+run the compiler with a simple make command:
 
-Once you have generated the compiler object, run ```python lys.py``` in the parent folder **Trillium** to use the package. 
+```
+make compiler \
+    INPUT_T_CIRCUIT="$(pwd)/data/inputs/transpiled_circuits/Compiled_sk_mol_HH_recdep_2_dep_4_20230224-04-07.txt" \
+    OUTPUT_DIR="$(pwd)/data/outputs" \
+    OUTPUT_REPORT_FILENAME="my_report.txt" \
+    INPUT_LAYOUT="$(pwd)/data/inputs/layout_files/sc_block_data_64_depot_2_corner.pkl" \
+    INPUT_HLASCHEDULER_PARAMS="$(pwd)/data/inputs/hla_scheduler_params/params.json" \
+    DUAL_MODE="True"
+```
+This should produce a `my_report.txt` in your `OUTPUT_DIR` folder.
+- Important Note: File paths should be absolute to ensure proper volume mounting
 
-A help message will be displayed to show the typical use case and help messages for each parameter. 
+List of Command Arguments for the Compiler:
 
+| Parameter                              | Type    | Description                                                                                                                              |
+|----------------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------|
+| INPUT_T_CIRCUIT                        | String  | Absolute path to the transpiled circuit file.                                                                                             |
+| OUTPUT_DIR                        | String  | Absolute file directory to where the output report is located.                                                                                      |
+| OUTPUT_REPORT_FILENAME (optional)              | String  | The name of the output report generated |
+| INPUT_LAYOUT (optional)              | String  | The path to a layout map representing a quantum chip architecture that uses a topological correction scheme in .pkl format. If no layout map is provided, Hansa generates a layout map that minimizes the quantum resources needed for achieving the target error approximation bound. |
+| INPUT_HLASCHEDULER_PARAMS (optional)               | String  | The path to a json file specifying the set of parameters used in the HLASCHEDULER. If not provided, default config will be used. Details can be found in the next section. |
+| GENERATE_HLA_SCHEDULE (optional) | Bool    | True if you would like to have the schedules generated for HLASCHEDULER. The default value is false.                                   |
+| DUAL_MODE (optional)    | Bool    | Users have the option to run both the scheduler and HLAScheduler sequentially when they provide their own layout. This enables them to compare the results generated by each scheduler. By default, this option is set to false, indicating that only the scheduler will be run.                                          |
 
-# Development:
+List of HLASCHEDULER parameters that can be provided in a JSON file:
 
-## Compiling the source code:
-Navigate to folder Trillium/src/cpp_compiler
+| Parameters                | Description                                                             |
+|---------------------------|-------------------------------------------------------------------------|
+| nb_fac                    | Todo. Default: 8.                                                       |
+| depot_entry               | Todo. Default: 2.                                                       |
+| depot_exit                | Todo. Default: 2.                                                       |
+| depot_capacity            | Todo. Default: 16.                                                      |
+| distillation_protocol     | Todo. Default: "20:4".                                                  |
+| physical_qubit_error_rate | Todo. Default: 0.001.                                                   |
 
-This folder includes all the main optimized C++ for the actual compiler. Uses Boost to connect to the python modules at **python_wrapper**.  
+# Getting started Local Development:
+Running the scheduler with a transpiled circuit file.
 
-To build:
+1. Once you have cloned the repo, install dependencies by navigating into the top-level directory of the repository and running
 
-Option 1: ```make``` will use the Makefile in the directory and compile the source files, will create runLysCompiler.o and runLysCompiler.so
+```
+pip install -e .
+```
 
-Option 2: If ```make``` fails (likely due to path issues on different machines), use the CMakeLists.txt file to build. Enter ```cmake .```. 
-
-This will build in the current directory which contains the CMakeList file. This however will overwrite the original Makefile. 
-
-Then enter ```make``` which will create runLysCompiler.so. Igonore any other CMake generated folders and files. 
-
-## Testing the cpp code:
-Navigate to folder Trillium/src/cpp_tests
-
-This folder includes all the test files for C++. Use ```make tests``` to run the tests.
-
-TODO: Please try to move these tests to **boost testing** framework.
-
-## Interfacing with Python modules:
-The python portion of the code is located at folder Trillium/src/python_wrapper
-
-This folder includes all the Python wrapper functions. To import the compiler into any Python file, import **LysCompiler_cpp_interface.py** and use the **LysCompiler** object. The **LysCompiler** will use the runLysCompiler.so file that you generated by compiling the cpp files.
-
-Please note: The source files inside this folder, other than **LysCompiler_cpp_interface.py**, are not maintained. The most up-to-date implementation is done in cpp, contained in Trillium/src/cpp_compiler
-
-
+2. Running the main compiler code with the file path
+```
+python3 src/main.py \
+    --input_t_circuit "PATH/TO/CIRCUIT" \
+    --output_dir "DIR/TO/OUTPUT" \
+    --output_report_filename "REPORT_FILENAME" \
+    --input_hla_scheduler_params "PATH/TO/LAYOUT/PARMS"
+```

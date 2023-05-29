@@ -11,19 +11,13 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v2
 
-      - name: Login to Quay
-        uses: docker/login-action@v1
+      - name: Build hansa compiler image
+        uses: docker/build-push-action@v2
         with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-
-      - name: Pull the image
-        run: docker pull quay.io/1qbit/hansa:compiler.v0.2
+          file: ./Dockerfile
+          tags: quay.io/1qbit/hansa:compiler.pr_review
+          push: false
 
       - name: Run tests
         run: 
-           >
-             docker run quay.io/1qbit/hansa:compiler.v0.2 bash -c \
-          #   TODO Remove after tests have been fixed
-          #   "pytest"
+             docker run quay.io/1qbit/hansa:compiler.pr_review bash # -c "pytest" uncomment after test have been fixed

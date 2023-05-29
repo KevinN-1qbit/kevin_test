@@ -1,0 +1,12 @@
+attrs==22.2.0
+# Want to keep joblib version consistent, as hash methodology may change between versions, per the docs:
+# https://joblib.readthedocs.io/en/latest/memory.html
+joblib==1.2.0
+networkx==3.0
+numpy==1.24.2
+matplotlib==3.7.1
+parsimonious==0.10.0
+prettytable==3.6.0
+pytest==7.2.2 # For testing
+PuLP==2.7.0
+simpy==4.0.1
