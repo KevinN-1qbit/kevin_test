@@ -1,21 +1,18 @@
-name: build_images
-
+name: Build Image
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version Tag'
-
+        description: 'Version of the image'
+        required: true
+        type: string
 jobs:
-
-  build:
-
+  build_and_push_to_quay:
+    name: Build the image and push it to Quay registry
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v2
-
 
       - name: Login to Quay
         uses: docker/login-action@v1
@@ -24,11 +21,25 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}    
 
+      - name: Generate tag
+        id: tag-generator
+        run: |
+          sha=${GITHUB_SHA::8}
+          timestamp=$(date +'%Y.%m.%d')
+          version=${{ github.event.inputs.version }}
+          echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
 
-      - name: Build hansa transpiler image and push it to the Quay registry
+      - name: Build and push API to Quay
         uses: docker/build-push-action@v2
         with:
-          file: ./Dockerfile
-          tags: quay.io/1qbit/hansa:compiler.v${{ github.event.inputs.version }}
+          file: ./docker/Dockerfile_api
+          tags: quay.io/1qbit/qarrot-ftqc:api.${{ steps.tag-generator.outputs.BUILD_ID }}
+          push: true
+
+      - name: Build and push worker node to Quay
+        uses: docker/build-push-action@v2
+        with:
+          file: ./docker/Dockerfile_worker
+          tags: quay.io/1qbit/qarrot-ftqc:node.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
           

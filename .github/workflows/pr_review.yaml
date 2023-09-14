@@ -1,11 +1,11 @@
 name: Pull Request Workflow
-on:
+on: 
+  - workflow_dispatch
   - pull_request
 jobs:
   run_tests:
-    name: Run tests on pull requests
+    name: Run smoke tests on pull requests
     runs-on: ubuntu-latest
-    environment: local
 
     steps:
       - name: Checkout the repo
@@ -18,12 +18,11 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: Pull the image
-        run: docker pull quay.io/1qbit/hansa:compiler.v0.2
+      - name: Build services
+        run: docker-compose build
 
-      - name: Run tests
-        run: 
-           >
-             docker run quay.io/1qbit/hansa:compiler.v0.2 bash -c \
-          #   TODO Remove after tests have been fixed
-          #   "pytest"
+      - name: Run services
+        run: docker-compose up -d
+
+      - name: Execute smoke tests
+        run: docker exec tests python3 ftqc/ftqc_smoke_tests.py
