@@ -1,0 +1,74 @@
+version: '3.9'
+services:
+# API services
+  ftqc-api:
+    image: quay.io/1qbit/qarrot-ftqc:api.v0.1
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile_api
+    container_name: ftqc-api
+    command: [ "/start-reload.sh" ]
+    environment:
+      MODULE_NAME: 'api.main'
+      LOG_LEVEL_APP: 'DEBUG'
+      LOG_FILE: "logs/ftqc_api.log"
+    ports:
+      - 8000:80
+    volumes:
+      - hansa_data:/hansa_data
+      - ./api:/app/api
+    networks:
+      - hansa-network
+
+  ftqc-node:
+    platform: "linux/amd64"
+    image: quay.io/1qbit/qarrot-ftqc:node.v0.1
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile_worker
+    container_name: ftqc-node
+    command: ["python3", "worker/ftqc_emulator_node.py"]
+    volumes:
+      - hansa_data:/hansa_data
+      - ./worker:/app/worker
+      - ./src:/app/src
+      # volume mount dummy data
+    environment:
+      LOG_LEVEL_APP: 'DEBUG'
+      LOG_FILE: "logs/worker.log"
+    networks:
+      - hansa-network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - hansa-network
+
+  portal:
+    image: quay.io/1qbit/qarrot-portal:2023.09.12.9797d4df.v0.3.2
+    container_name: portal
+    ports:
+      - "3000:3000"
+    environment:
+      - TRANSPILER_API=http://transpiler-api
+      - COMPILER_API=http://compiler-api
+      - SK_API=http://sk-api
+      - FTQC_API=http://ftqc-api
+      - PRE_API=http://pre-api
+      - QARE_API=http://qare-api
+      - STORAGE_DIR=/hansa_data
+    volumes:
+      - hansa_data:/app/hansa_data
+    networks:
+      - hansa-network
+
+networks:
+  hansa-network:
+    name: hansa-network
+
+volumes:
+  hansa_data:

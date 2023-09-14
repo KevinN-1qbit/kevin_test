@@ -18,9 +18,6 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: Build services
-        run: docker-compose build
-
       - name: Run services
         run: docker-compose up -d
 

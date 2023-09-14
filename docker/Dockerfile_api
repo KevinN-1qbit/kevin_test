@@ -1,0 +1,28 @@
+# FastAPI Image
+FROM tiangolo/uvicorn-gunicorn:python3.11
+ARG HOME_DIR=/app
+ARG LOG_DIR=${HOME_DIR}/logs
+
+
+RUN apt-get update && apt-get install -y build-essential \
+  curl \
+  vim
+
+# Copy in the directories
+COPY config ${HOME_DIR}/config
+COPY api ${HOME_DIR}/api
+COPY logger ${HOME_DIR}/logger
+
+# Install dependencies
+WORKDIR ${HOME_DIR}/api
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Clean up tmp
+WORKDIR ${HOME_DIR}
+RUN rm -rf /tmp
+
+# Create log directory
+RUN mkdir ${LOG_DIR}
+WORKDIR ${HOME_DIR}
+

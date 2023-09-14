@@ -1,0 +1,26 @@
+FROM python:3.10-slim
+ARG HOME_DIR=/app
+ARG LOG_DIR=${HOME_DIR}/logs
+ENV PYTHONPATH="${PYTHONPATH}:${HOME_DIR}"
+
+# Install system dependencies including gcc
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        g++ \
+        build-essential \
+        libffi-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy files over
+WORKDIR ${HOME_DIR}
+COPY . .
+
+WORKDIR ${HOME_DIR}/worker/ftqc_emulator
+RUN pip install --upgrade pip && \
+pip install --no-cache-dir -r requirements.txt
+
+# Create log directory
+WORKDIR ${HOME_DIR}
+RUN mkdir ${LOG_DIR}
