@@ -18,8 +18,8 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: Run services
-        run: docker-compose up -d
+      - name: Run services and execute smoke tests
+        run: docker-compose up -d --build
 
       - name: Execute smoke tests
         run: docker exec tests python3 ftqc/ftqc_smoke_tests.py
