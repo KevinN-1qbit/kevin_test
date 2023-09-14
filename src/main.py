@@ -1,450 +1,605 @@
-import argparse
-import configparser
-import json
-import os
-import os.path as osp
-import sys
-import time
-from typing import Dict, Any
-from layout_processor.magic_state_factory import MagicStateFactory
-from layout_processor.tile_layout import (
-    read_layout_from_pkl,
-    get_memory_fabric_with_2x2_data_blocks_layout,
-)
-from layout_processor.adjacency_graph import AdjacencyGraph
-from hla_scheduler.QRE_report import generate_report_and_save
-from hla_scheduler.hla_scheduler import Circuit, QuantumSystem
-from scheduler.steiner_tree_heuristic import solve_rotations_scheduling
-from scheduler.circuit_and_rotation.generate_rotation import (
-    parse_rotations,
-    convert_Y_operators,
-)
-from scheduler.data_qubit_assignment import (
-    AssignPolicy,
-    solve_data_qubit_assignment,
-)
-from helpers import paths
-from helpers.utils import update_dict_from_json
-
-# Load configs
-config = configparser.ConfigParser()
-config.read_file(open("src/config/scheduler.conf"))
-
-# Load default HLA scheduler parameters
-with open("src/hla_scheduler/hla_scheduler_default_params.json") as f:
-    input_hla_scheduler_params_dict = json.load(f)
+from typing import Optional, TypedDict
+from math import sqrt
+import logging.config
+import stim, sinter, json
+import numpy as np
+from scipy.optimize import curve_fit
+from uncertainties import correlated_values, unumpy
+import matplotlib.pyplot as plt
+from noise import NoiseParams, NoiseModel, units
+import src.input_parser as input
+from src.logger.src_logger_config import LOGGING_CONFIG
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="""Employs the SK algorithm, a transpiled circuit and a
-        scheduler to produce an efficient schedule for executing a user-defined
-        quantum circuit on the quantum chip architecture suggested by Hansa or
-        defined by the user, while minimizing the resources required."""
+# Setup Logger
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger(__name__)
+
+
+class Measure(TypedDict):
+    value: float
+    unit: str
+
+
+def emulate_ftqc_json(
+    code_dict,
+    number_of_cores,
+    protocol_dict,
+    decoder_dict,
+    qubit_technology_dict,
+    output_dir,
+    plot_filename,
+):
+    """Emulated ftqc based on given json input and generates visualization and report.
+
+    Args:
+        code_dict (dict): Code dictionary
+        number_of_cores (int): Number of cores
+        protocol_dict (dict): Protocol dictionary
+        decoder_dict (dict): Decoder dictioanry
+        qubit_technology_dict (dict): Qubit technology parameters
+        output_dir (str): Directory to save outputs.
+        plot_filename (str): Filename for the generated plot.
+    Returns:
+        ftqc_report (dict): FTQC report
+    """
+    logger.info(f"code_dict={code_dict}")
+    logger.info(f"number_of_cores={number_of_cores}")
+    logger.info(f"protocol_dict={protocol_dict}")
+    logger.info(f"decoder_dict={decoder_dict}")
+    logger.info(f"qubit_technology_dict={qubit_technology_dict}")
+    logger.info(f"output_dir={output_dir}")
+    logger.info(f"plot_filename={plot_filename}")
+
+    # Set up parameters
+    noise_params = NoiseParams.transmon(qubit_technology_dict["parameters"])
+    noise_model = NoiseModel.transmon(noise_params.ps)
+    protocol = input.get_protocol_specifier(
+        code_dict["specifier"], protocol_dict["specifier"]
     )
-    parser.add_argument("--input_t_circuit", help="Path to transpiled input file")
-    parser.add_argument("--output_dir", help="Directory to output report")
-    parser.add_argument("--output_report_filename", help="Name of the output report")
-    parser.add_argument("--input_layout", help="Path to input layout file")
-    parser.add_argument(
-        "--input_hla_scheduler_params", help="Path to input hla scheduler params file"
-    )
-    parser.add_argument(
-        "--generate_hla_schedule",
-        help="Choose to generate hla schedule when running HLAScheduler",
-    )
-    parser.add_argument(
-        "--dual_mode",
-        help="Choose whether to run both HLAScheduler and scheduler",
-    )
-    args = parser.parse_args(None if sys.argv[1:] else ["-h"])
+    rounds = protocol_dict["number_of_rounds"]
+    parity_check_time = calculate_parity_check_time(noise_params, rounds)
+    decoder = input.get_decoder_specifier(decoder_dict["specifier"])
 
-    # Make sure that all required arguments are provided
-    required_set = [args.input_t_circuit, args.output_dir]
+    # TODO (Issue #8) get code distance from input file
+    code_distance = None
 
-    if args.input_t_circuit:
-        if not osp.isfile(args.input_t_circuit) and not osp.exists(
-            args.input_t_circuit
-        ):
-            parser.error(f"The input_t_circuit: {args.input_t_circuit} does not exist")
-    if args.output_dir:
-        if not osp.exists(args.output_dir):
-            parser.error(f"The output_dir: {args.output_dir} does not exist")
+    # If min_ler_estimate is not None, then we will plot the fit function upto the
+    # distance that gives this logical error rate
+    d_max = None
 
-    if None in required_set:
-        if args.input_t_circuit is None:
-            parser.error(
-                "Missing file path to circuit. Please specify "
-                "the path to input circuit by: "
-                "--input_t_circuit path_to_input_circuit"
+    # TODO: Investigate and make this field configurable if desired (#18)
+    min_ler_estimate = 1e-15
+
+    # FTQC emulations
+    task_stats = emulate_ftqc(
+        noise_model, protocol, decoder, rounds, number_of_cores, code_distance
+    )
+
+    # TODO: Improve this logical flow (#19)
+    if code_distance is None:
+        mean, std, plot_params = fit(task_stats)
+
+        # Find maximum distance to plot the fit function from minimum logical error rate
+        if min_ler_estimate is not None:
+            d_max = find_cutoff_d_from_ler(
+                min_ler_estimate,
+                *correlated_values(
+                    plot_params["fit_params"][0], plot_params["fit_params"][1]
+                ),
             )
 
-        elif args.output_dir is None:
-            parser.error(
-                "Missing file directory to output. Please specify "
-                "the directory to store the output report by: "
-                "--output_dir directory_to_store_outputs"
-            )
+        plot_path = plot_ler_with_fit(
+            x_data=plot_params["xs"],
+            y_data=plot_params["ys"],
+            y_err=plot_params["es"],
+            fit_params=plot_params["fit_params"],
+            x_max=d_max,
+            plot_dir=output_dir,
+            plot_name=plot_filename,
+        )
+
+        ftqc_report = generate_output_data_fit(parity_check_time, mean, std, plot_path)
+    else:
+        logical_error_rate = task_stats[0].errors / task_stats[0].shots
+        ftqc_report = generate_output_data_ler(parity_check_time, logical_error_rate)
+
+    logger.info(f"ftqc_report={ftqc_report}")
+    logger.info("- Return")
+    return ftqc_report
+
+
+def read_input_data(file_path: str) -> dict:
+    """Read input data from file.
+
+    Args:
+        file_path (str): Path to input file.
+
+    Returns:
+        dict: A dictionary containing the input data.
+    """
+    logger.info(f"file_path={file_path}")
+
+    with open(file_path, "r") as read_file:
+        args = json.load(read_file)
+    input.validate_input_data(args)
+
+    logger.info(f"args={args}")
+    logger.info("- Return")
     return args
 
 
-def parse_input_configs():
-    """Parse the command arguments and update the input hla scheduler params
-    dict.
-
-    Returns:
-        input_t_circuit (str): The path to the circuit file.
-        output_dir (str): The path to the output directory.
-        output_report_filename (str): The filename of the output report.
-        layout_path (str): The path to the layout file.
-        input_hla_scheduler_params_dict (dict): A dictionary containing
-            parameters for the HLA scheduler. Default is False.
-        generate_hla_schedule (bool): Whether to generate schedules for HLAScheduler.
-        dual_mode (bool): Whether to run both HLAScheduler and scheduler.
-            Default is False.
-        depot_exit (int): The number of data-storage blocks connections (1 for
-            serial scheduling).
-    """
-    # default value for generate_hla_schedule, dual_mode
-    generate_hla_schedule, dual_mode = False, False
-
-    try:
-        args = parse_args()
-        input_t_circuit = args.input_t_circuit
-        output_dir = args.output_dir
-        output_report_filename = args.output_report_filename
-        layout_path = args.input_layout
-        input_hla_scheduler_params = args.input_hla_scheduler_params
-
-        if args.generate_hla_schedule:
-            generate_hla_schedule = args.generate_hla_schedule
-        if args.dual_mode:
-            dual_mode = eval(args.dual_mode)
-    except Exception as e:
-        print(f"Failed to parse inputs: {e}")
-
-    try:
-        print("Reading the hla scheduler params.")
-        if input_hla_scheduler_params:
-            update_dict_from_json(
-                input_hla_scheduler_params_dict, input_hla_scheduler_params
-            )
-        print(input_hla_scheduler_params_dict)
-    except Exception as e:
-        print(f"Failed to update the input_hla_scheduler_params_dict: {e}")
-
-    depot_exit = input_hla_scheduler_params_dict["depot_exit"]
-
-    return (
-        input_t_circuit,
-        output_dir,
-        output_report_filename,
-        layout_path,
-        input_hla_scheduler_params_dict,
-        generate_hla_schedule,
-        dual_mode,
-        depot_exit,
-    )
-
-
-def preprocess_circuit_and_layout(input_t_circuit, layout_path, depot_exit):
-    """Preprocess the circuit and read in the layout from a .pkl file.
+def emulate_ftqc(
+    noise_model: NoiseModel,
+    protocol: str = "surface_code:rotated_memory_z",
+    decoder: list[str] = ["pymatching"],
+    rounds: int = 1,
+    number_of_cores: int = 8,
+    code_distance: Optional[int] = None,
+) -> list[sinter.TaskStats]:
+    """Generate and run Monte Carlo sampling of quantum error correction circuits.
 
     Args:
-        input_t_circuit (str): The path to the circuit file.
-        layout_path (str): The path to the input layout .pkl file.
+        protocol (str, optional): protocol specifier. Defaults to
+            "surface_code:rotated_memory_z".
+        decoder (list[str], optional): decoder specifier. Defaults to ["pymatching"].
+        rounds (int, optional): number of parity check rounds. Defaults to 1.
+        number_of_cores (int, optional): number of cores. Defaults to 8.
+        code_distance (Optional[int], optional): code distance. Defaults to None.
+        noise_model (NoiseModel): noise model
 
     Returns:
-        circuit_(Circuit): The quantum circuit object.
-        layout (TileLayout): The layout of a surface code error-corrected
-            quantum computer.
+        list[sinter.TaskStats]: Statistics for the emulation results for each code
+            distance.
     """
-    print("Start preprocessing circuit and layout")
-    try:
-        circuit_ = Circuit()
-        circuit_.read_circuit(input_t_circuit)
+    logger.info(f"noise_model={noise_model}")
+    logger.info(f"protocol={protocol}")
+    logger.info(f"decoder={decoder}")
+    logger.info(f"rounds={rounds}")
+    logger.info(f"number_of_cores={number_of_cores}")
+    logger.info(f"code_distance={code_distance}")
 
-        if not layout_path:
-            # generate memory fabric in the HLA layout from the number of qubits extracted from the circuit
-            layout = get_memory_fabric_with_2x2_data_blocks_layout(
-                circuit_.trans_cir.num_qubits,
-                depot_exit,
-            )
-        else:
-            # if a custom layout is input, read it from its pickle file
-            layout = read_layout_from_pkl(layout_path)
-
-        # Plot layout read
-        # layout.plot()
-    except Exception as e:
-        raise Exception(f"Failed to preprocess circuit and layout: {e}")
-
-    print("Done preprocessing circuit and layout")
-    return circuit_, layout
-
-
-def build_graphs_and_initialize_magic_state_factory(
-    circuit: Circuit,
-    layout,
-):
-    """Build an adjacency graph to represent the quantum hardware's physical
-        constraints, a dependency graph for the quantum circuit's logical
-        constraints and initalize a magic state factory to handle magic
-        state update & availability.
-
-    Args:
-        circuit (Circuit:): The quantum circuit object.
-        layout (TileLayout): The layout of a surface code error-corrected
-            quantum computer.
-        depot_exit (int): number of data-storage blocks connections (1 for
-            serial scheduling)
-
-    Returns:
-        adj_graph (AdjacencyGraph): A networkx graph representing the circuit's
-            connectivity.
-        ms_factory (MagicStateFactory): A factory handles magic state
-            update & availability.
-    """
-    print("Start building graphs and initalizing magic state factory")
-    try:
-        # build adjacency graph
-        adj_graph = AdjacencyGraph(layout)
-        adj_graph.process_graph()
-
-        # build dependency graph
-        circuit.process_circuit(adj_graph)
-    except Exception as e:
-        raise Exception(f"Failed to build graphs: {e}")
-    try:
-        # initialize magic state factory
-        ms_factory = MagicStateFactory(
-            tick_replenish=0,
-            graph=adj_graph,
-        )
-    except Exception as e:
-        raise Exception(f"Failed to initialize magic state factory: {e}")
-
-    print("Done building graphs and initalizing magic state factory")
-    return adj_graph, ms_factory
-
-
-def run_HLAScheduler(
-    config,
-    input_t_circuit,
-    circuit_,
-    adj_graph,
-    ms_factory,
-    depot_exit,
-    input_hla_scheduler_params_dict,
-    output_dir,
-    output_report_filename,
-) -> None:
-    """
-    Runs the quantum HLAScheduler on the given circuit.
-
-    Args:
-        config(Dict[str, Any]): A dictionary containing configuration parameters.
-        input_t_circuit (str): The path to the circuit file.
-        circuit_(Circuit): The quantum circuit object.
-        adj_graph (AdjacencyGraph): The graph representing the qubit
-            adjacencies in the layout.
-        ms_factory (MatchStrategyFactory): The factory object that handles
-            magic state update & availability.
-        depot_exit (int): number of data-storage blocks connections (1 for
-            serial scheduling).
-        input_hla_scheduler_params_dict (Dict[str, Any]): A dictionary
-            containing layout parameters.
-        output_dir(str): The directory where the output report will be saved.
-        output_report_filename(str): The filename of the output report.
-    Returns:
-        None.
-
-    Raises:
-        FileNotFoundError: If the circuit file does not exist.
-        Exception: If build the quantum system and run the simulation.
-        Exception: If failed to generate and save the QRE report.
-
-    """
-    print("start running HLAScheduler")
-    start = time.time()
-
-    # Load the circuit file
-    if not os.path.exists(input_t_circuit):
-        raise FileNotFoundError(f"The circuit file {input_t_circuit} does not exist.")
-
-    try:
-        # Build the quantum system
-        qc = QuantumSystem(
-            circuit=circuit_,
-            adj_graph=adj_graph,
-            ms_fact=ms_factory,
-            distillation_protocol=input_hla_scheduler_params_dict[
-                "distillation_protocol"
-            ],
-            physical_qubit_error_rate=input_hla_scheduler_params_dict[
-                "physical_qubit_error_rate"
-            ],
-            depot_capacity=input_hla_scheduler_params_dict["depot_capacity"],
-            nb_factories=input_hla_scheduler_params_dict["nb_fac"],
-            depot_entries=input_hla_scheduler_params_dict["depot_entry"],
-            depot_exits=depot_exit,
-        )
-
-        # Run the simulation
-        expected_runtime = qc.simulate(
-            nb_runs=int(config["Experiments"]["nb_run"]),
-            print_simulation=config["Experiments"]["print_out"],
-        )
-
-        end = time.time()
-        total_compilation_time = end - start
-        print(f"\nTotal QRE time : {total_compilation_time:.3f}")
-    except Exception as e:
-        raise (f"Failed to build the quantum system and run the simulation: {e}")
-
-    try:
-        # Generate and save the QRE report
-        circuit_filename = os.path.basename(input_t_circuit)
-        if not output_report_filename:
-            output_report_filename = (
-                os.path.splitext(circuit_filename)[0] + "_QREreport.txt"
-            )
-        generate_report_and_save(
-            circuit_,
-            qc,
-            expected_runtime,
-            print_details=config["Report"]["print_details"],
-            save_report=config["Report"]["save_report"],
-            output_dir=output_dir,
-            output_report_name=output_report_filename,
-            compilation_time=total_compilation_time,
-        )
-    except Exception as e:
-        raise (f"Failed to generate and save the QRE report: {e}")
-
-    print("Done running HLAScheduler")
-
-
-def run_scheduler(input_t_circuit, adj_graph, ms_factory):
-    """Runs the scheduler algorithm to schedule quantum rotations on qubits.
-
-    Args:
-        input_t_circuit (str): The path to the circuit file.
-        adj_graph (AdjacencyGraph): The graph representing the qubit adjacencies
-            in the layout.
-        ms_factory (MatchStrategyFactory): The factory object that handles
-            magic state update & availability.
-
-    Returns:
-        Tuple: A tuple of three values:
-            - rotations_scheduling (List[RotationData]): A list of rotations,
-                each represented as a RotationData object.
-            - expected_quantum_computation_time (float): The expected quantum
-                computation time in seconds.
-            - compilation_time (float): The total time taken by the scheduler
-                to compile the rotations, in seconds.
-
-    Raises:
-        FileNotFoundError: If the circuit file at `input_t_circuit` is not found.
-        ValueError: If `adj_graph` is not an instance of `AdjacencyGraph`.
-        TypeError: If `ms_factory` is not an instance of `MatchStrategyFactory`.
-    """
-    print("Start running scheduler")
-    try:
-        circuit_ = parse_rotations(input_t_circuit, split_y=False)
-
-        # solve qubit assignment
-        assignments, non_corner_patches = solve_data_qubit_assignment(
-            circuit_, adj_graph, policy=AssignPolicy.RANDOM
-        )
-
-        #! (must be done after the qubit_assignments)
-        circuit_ = convert_Y_operators(circuit_, non_corner_patches)
-
-        # add turns
-        circuit_.add_turn_qubits(adj_graph.qubit_angle)
-
-        # Run scheduler
-        (
-            rotations_scheduling,
-            expected_quantum_computation_time,
-            compilation_time,
-        ) = solve_rotations_scheduling(circuit_, adj_graph, ms_factory)
-    except FileNotFoundError as e:
-        raise Exception(f"File not found at path: {input_t_circuit}: {e}")
-    except ValueError as e:
-        raise Exception(
-            f"AdjacencyGraph argument must be an instance of AdjacencyGraph: {e}"
-        )
-    except TypeError as e:
-        raise Exception(
-            f"MatchStrategyFactory argument must be an instance of MatchStrategyFactory: {e}"
-        )
-
-    print("Done running scheduler")
-    return rotations_scheduling, expected_quantum_computation_time, compilation_time
-
-
-# main function
-if __name__ == "__main__":
-    """
-    Compilation flow:
-    1) Parse input configs
-    2) Preprocess circuit and layout
-    3) Build graphs and initialize magic state factory
-    4) Run scheduler AND/OR HLAScheduler
-    5) Generate QRE report
-    """
-
-    # STEP 1: parse command line inputs and update configs
-    (
-        input_t_circuit,
-        output_dir,
-        output_report_filename,
-        layout_path,
-        input_hla_scheduler_params_dict,
-        generate_hla_schedule,
-        dual_mode,
-        depot_exit,
-    ) = parse_input_configs()
-
-    # STEP 2: preprocess circuit and layout
-    circuit, layout = preprocess_circuit_and_layout(
-        input_t_circuit, layout_path, depot_exit
-    )
-
-    # STEP 3: build adjacency, dependency graphs and initialize magic state factory
-    adj_graph, ms_factory = build_graphs_and_initialize_magic_state_factory(
-        circuit, layout
-    )
-
-    # STEP 4: run HLAScheduler AND/OR scheduler
-    if layout_path:
-        run_scheduler(input_t_circuit, adj_graph, ms_factory)
-        if dual_mode:
-            run_HLAScheduler(
-                config,
-                input_t_circuit,
-                circuit,
-                adj_graph,
-                ms_factory,
-                depot_exit,
-                input_hla_scheduler_params_dict,
-                output_dir,
-                output_report_filename,
-            )
+    # Generate tasks for Monte Carlo sampling
+    tasks = []
+    if code_distance is None:
+        max_code_distance = 9
+        for d in range(3, max_code_distance + 2, 2):
+            circuit = stim.Circuit.generated(protocol, rounds=rounds, distance=d)
+            circuit = noise_model.noisy_circuit(circuit)
+            tasks += [sinter.Task(circuit=circuit, json_metadata={"d": d})]
     else:
-        run_HLAScheduler(
-            config,
-            input_t_circuit,
-            circuit,
-            adj_graph,
-            ms_factory,
-            depot_exit,
-            input_hla_scheduler_params_dict,
-            output_dir,
-            output_report_filename,
+        circuit = stim.Circuit.generated(
+            protocol, rounds=rounds, distance=code_distance
+        )
+        circuit = noise_model.noisy_circuit(circuit)
+        tasks += [sinter.Task(circuit=circuit, json_metadata={"d": code_distance})]
+
+    # Run Monte Carlo sampling of quantum error correction circuits
+    task_stats = sinter.collect(
+        num_workers=number_of_cores,
+        tasks=tasks,
+        decoders=decoder,
+        max_shots=50_000_000,
+        max_errors=10000,
+        print_progress=False,
+    )
+
+    logger.info(f"task_stats={task_stats}")
+    logger.info("- Return")
+    return task_stats
+
+
+def fit(task_stats: sinter.TaskStats) -> [list, list, dict]:
+    """Fit the error rates and code distances to an exponential curve.
+
+    Args:
+        task_stats (sinter.TaskStats): Statistics for the emulation results for each
+            code distance.
+
+    Returns:
+        [list, list, dict]: Mean and standard deviation of the fitting parameters and
+            data used to plot.
+    """
+    logger.info(f"task_stats={task_stats}")
+
+    # Get the error rate for each distance
+    xs, ys, es = [], [], []
+    for stats in task_stats:
+        xs += [stats.json_metadata["d"]]
+        ys += [stats.errors / stats.shots]
+        es += [sqrt(ys[-1] * (1 - ys[-1]) / stats.shots)]
+
+    # Remove points with very small error rates
+    xs, ys, es = (np.array(_) for _ in [xs, ys, es])
+    inds = np.where(es / ys > 0.0001)[0]
+    xs, ys, es = (_[inds] for _ in [xs, ys, es])
+
+    # Fit the error rate to an exponential curve
+    p_opt, p_cov = curve_fit(
+        lambda d, a, b: a - (d + 1) / 2 * b, xs, np.log(ys), sigma=es / ys
+    )
+    mean = np.array(p_opt)
+    std = np.sqrt(np.diagonal(p_cov))
+
+    params = (p_opt, p_cov)
+    plottable = {"xs": xs, "ys": ys, "es": es, "fit_params": params}
+
+    logger.info(f"mean={mean}")
+    logger.info(f"std={std}")
+    logger.info(f"plottable={plottable}")
+    logger.info("- Return")
+    return mean, std, plottable
+
+
+def calculate_parity_check_time(
+    noise_params: NoiseParams, num_parity_check_rounds: int
+) -> Measure:
+    """Calculate the parity check time.
+
+    Args:
+        noise_params (NoiseParams): Noise parameters.
+        num_parity_check_rounds (int): Number of parity check rounds.
+
+    Returns:
+        Measure: Parity check time in microseconds.
+    """
+    logger.info(f"noise_params={noise_params}")
+    logger.info(f"num_parity_check_rounds={num_parity_check_rounds}")
+
+    t1, t2, tM, tR = (
+        noise_params.t1,
+        noise_params.t2,
+        noise_params.tM,
+        noise_params.tR,
+    )
+
+    logger.info("- Return")
+
+    parity_check_time: Measure = {
+        "value": round(
+            (tM + num_parity_check_rounds * (4 * t2 + 2 * t1 + tM + tR)) / units["μs"],
+            3,
+        ),
+        "unit": "μs",
+    }
+
+    return parity_check_time
+
+
+def generate_output_data_fit(
+    parity_check_time: Measure, mean, std, emulator_plot_path
+) -> dict:
+    """Generate output data for fitting results.
+
+    Args:
+        parity_check_time (Measure): Parity check time.
+        mean (array): Mean of the fitting parameters.
+        std (array): Standard deviation of the fitting parameters.
+        emulator_plot_path (str): The file path of emulator visualization.
+
+    Returns:
+        dict: Output data for fitting results.
+    """
+    logger.info(f"parity_check_time={parity_check_time}")
+    logger.info(f"mean={mean}")
+    logger.info(f"std={std}")
+    logger.info(f"emulator_plot_path={emulator_plot_path}")
+
+    output = {
+        "parity_check_time": parity_check_time,
+        "fit": {
+            # functional form of the fit in LaTeX format
+            "functional_form": r"\exp\left(a - \dfrac{b(d+1)}{2}\right)",
+            "fitting_parameters": {
+                "a": {"value": round(mean[0], 3), "error": round(std[0], 3)},
+                "b": {"value": round(mean[1], 3), "error": round(std[1], 3)},
+            },
+        },
+        "emulator_plot_path": emulator_plot_path,
+    }
+
+    logger.info(f"output={output}")
+    logger.info("- Return")
+    return output
+
+
+def generate_output_data_ler(
+    parity_check_time: Measure, logical_error_rate: float
+) -> dict:
+    """Generate output data for logical error rate.
+
+    Args:
+        parity_check_time (Measure): Parity check time.
+        logical_error_rate (float): Logical error rate.
+
+    Returns:
+        dict: Output data for logical error rate.
+    """
+    logger.info(f"parity_check_time={parity_check_time}")
+    logger.info(f"logical_error_rate={logical_error_rate}")
+
+    output = {
+        "parity_check_time": parity_check_time,
+        "logical_error_rate": logical_error_rate,
+    }
+
+    logger.info(f"output={output}")
+    logger.info("- Return")
+    return output
+
+
+def generate_output_data_plot(
+    code_distance: list[int], logical_error_rate: list[float], uncertainity: list[float]
+) -> dict:
+    """Generate output data for logical error rate.
+
+    Args:
+        code_distance (list(int)): a list of integers
+            corresponding to code distances simulated.
+        logical_error_rate (list(float)): a list of floats
+            for logical error rates from simulation results
+        uncertainity (list(float)): a list of floats corresponding
+            to uncertainites in the logical error rates.
+    Returns:
+        dict: Output data used for plotting.
+    """
+    logger.info(f"code_distance={code_distance}")
+    logger.info(f"logical_error_rate={logical_error_rate}")
+    logger.info(f"uncertainity={uncertainity}")
+
+    output = {}
+    for i in range(len(code_distance)):
+        output[f"distance_{code_distance[i]}"] = {
+            "distance": int(code_distance[i]),
+            "logical_error_rate": logical_error_rate[i],
+            "uncertainity": uncertainity[i],
+        }
+
+    logger.info(f"output={output}")
+    logger.info("- Return")
+    return output
+
+
+def write_output_data(
+    output: dict,
+    output_file_dir: str = "data/output/",
+    output_file_name: str = "output.json",
+    format="json",
+):
+    """Write output data to external file.
+
+    Args:
+        output (dict): Output data.
+        output_file_dir (str): The directory to output file. Defaults to "data/output/".
+        output_file_name (str): The name to output file. Defaults to "output.json".
+        format (str, optional): File format. Defaults to "json".
+    """
+    logger.info(f"output={output}")
+    logger.info(f"output_file_dir={output_file_dir}")
+    logger.info(f"output_file_name={output_file_name}")
+    logger.info(f"format={format}")
+
+    output_file_path = output_file_dir + output_file_name
+    if format == "json":
+        output_json = json.dumps(output, indent=4)
+
+        with open(output_file_path, "w") as write_file:
+            write_file.write(output_json)
+            write_file.close()
+
+        logger.info(f"Successfully save the output at {output_file_path}")
+
+
+def fit_func(d: np.array, *params: tuple[float, float]) -> np.array:
+    """
+    Fit function for the log of logical error rate.
+
+    Args:
+        d (numpy array): Distance.
+        params (tuple): Fit parameters a and b.
+
+    Returns:
+        Numpy array of log of logical error rates.
+    """
+    logger.info(f"d={d}")
+    logger.info(f"params={params}")
+
+    if len(params) == 2:
+        a, b = params
+    else:
+        err_msg = f"Not implemented fit for #{len(params)} parameters"
+        logger.error(err_msg)
+        raise NotImplementedError(err_msg)
+
+    logger.info("- Return")
+    return a - (d + 1) / 2 * b
+
+
+def find_cutoff_d_from_ler(logical_error_rate: float, *params) -> int:
+    """
+    For a given logical error rate, find the cutoff (minumum) code distance
+        required to achieve it based on the fit parameters.
+
+    Args:
+        logical_error_rate (float): The minimum logical error rate needed to achie.
+        params (tuple(float)): Fit parameters a and b.
+
+    Returns:
+        Cutoff code distance.
+    """
+    logger.info(f"logical_error_rate={logical_error_rate}")
+    logger.info(f"params={params}")
+
+    if len(params) == 2:
+        a, b = params
+    else:
+        err_msg = f"Not implemented fit for #{len(params)} parameters"
+        logger.error(err_msg)
+        raise NotImplementedError(err_msg)
+    d = unumpy.nominal_values((a - np.log(logical_error_rate)) * 2 / b - 1)
+    if np.ceil(d) % 2 == 1:
+        logger.info("- Return")
+        return np.ceil(d)
+    else:
+        logger.info("- Return")
+        return np.ceil(d) + 1
+
+
+def plot_ler_with_fit(
+    x_data: list[int],
+    y_data: list[float],
+    y_err: list[float],
+    fit_params: tuple[float, float],
+    x_max: int = None,
+    plot_dir="data/output/",
+    plot_name="plot",
+):
+    """
+    Plot logical error rate including the best fit line, and save the generated figure
+    in the provided directory and with the specified name.
+
+    Args:
+        x_data (list[int]): x-axis values for plot corresponding to code distance.
+        y_data (list[float]): y-axis values for plot corresponding to the
+                logical error rates of each code distance.
+        y_err (list[float]): uncertainity of the logical error rates (y_data)
+        fit_params (tuple[float, float]): parameters for the best fit line.
+        x_max (int, optional): Maximum code distance to plot the fit function.
+        plot_dir (str, optional): Directory where the plot will be saved. Defaults to
+            "data/output/".
+        plot_name (str, optional): Name of the generated plot image. Defaults to
+            "plot".
+
+    Returns:
+        str: The path where the plot is saved.
+    """
+    logger.info(f"x_data={x_data}")
+    logger.info(f"y_data={y_data}")
+    logger.info(f"y_err={y_err}")
+    logger.info(f"fit_params={fit_params}")
+    logger.info(f"x_max={x_max}")
+    logger.info(f"plot_dir={plot_dir}")
+    logger.info(f"plot_name={plot_name}")
+
+    # fit parameters
+    params = correlated_values(fit_params[0], fit_params[1])
+
+    # generate the x values for fit boundaries
+    if x_max is None:
+        ds = np.array(sorted(x_data))
+    elif x_max is not None and x_max <= max(x_data):
+        ds = np.array(sorted([d for d in x_data if d <= x_max]))
+    else:
+        ds = np.arange(3, x_max + 1, 2)
+
+    # find the estimated y values from the fit
+    _ys = fit_func(ds, *params)
+    n, s = (unumpy.nominal_values(_ys), unumpy.std_devs(_ys))
+
+    fig, ax1 = plt.subplots(ncols=1, figsize=(15, 15))
+    ax1.tick_params(axis="both", which="major", labelsize=22)
+
+    # plot the data points from simulation with error bars
+    ax1.errorbar(
+        x_data,
+        y_data,
+        y_err,
+        ls="",
+        marker="o",
+        mfc="white",
+        color="r",
+        capsize=4,
+        lw=2,
+    )
+
+    # plot the fit function with region of uncertainty
+    ax1.fill_between(ds, np.exp(n - s), np.exp(n + s), alpha=0.5, ls="-")
+
+    # Plot paramters
+    ax1.grid(which="both")
+    ax1.set_ylabel("Logical error rate", fontsize=34)
+    ax1.set_xlabel("Code distance (d)", fontsize=34)
+    ax1.set_yscale("log", base=10)
+
+    # save plot to an image file
+    plot_path = plot_dir + plot_name + ".png"
+    plt.savefig(plot_path)
+    plt.close()
+
+    logger.info(f"Successfully save plot in {plot_path}")
+    logger.info(f"plot_path={plot_path}")
+    logger.info("- Return")
+    return plot_path
+
+
+if __name__ == "__main__":
+    # Read input file
+    input_file_name = "default_input.json"
+    input_file_path = "data/input/" + input_file_name
+    args = read_input_data(input_file_path)
+
+    # Set up parameters
+    noise_params = NoiseParams.transmon(args["qubit_technology"]["parameters"])
+    noise_model = NoiseModel.transmon(noise_params.ps)
+    protocol = input.get_protocol_specifier(
+        args["code"]["specifier"], args["protocol"]["specifier"]
+    )
+    rounds = args["protocol"]["number_of_rounds"]
+    parity_check_time = calculate_parity_check_time(noise_params, rounds)
+    decoder = input.get_decoder_specifier(args["decoder"]["specifier"])
+    number_of_cores = args["number_of_cores"]
+
+    # TODO (Issue #8) get code distance from input file
+    code_distance = None
+
+    # If min_ler_estimate is not None, then we will plot the fit function upto the
+    # distance that gives this logical error rate
+    d_max = None
+
+    # TODO: Investigate and make this field configurable if desired (#18)
+    min_ler_estimate = 1e-15
+
+    # FTQC emulations
+    task_stats = emulate_ftqc(
+        noise_model, protocol, decoder, rounds, number_of_cores, code_distance
+    )
+
+    # TODO: Improve this logical flow (#19)
+    if code_distance is None:
+        mean, std, plot_params = fit(task_stats)
+
+        # Find maximum distance to plot the fit function from minimum logical error rate
+        if min_ler_estimate is not None:
+            d_max = find_cutoff_d_from_ler(
+                min_ler_estimate,
+                *correlated_values(
+                    plot_params["fit_params"][0], plot_params["fit_params"][1]
+                ),
+            )
+
+        # Generate and save plot
+        plot_path = plot_ler_with_fit(
+            x_data=plot_params["xs"],
+            y_data=plot_params["ys"],
+            y_err=plot_params["es"],
+            fit_params=plot_params["fit_params"],
+            x_max=d_max,
+            plot_dir="data/output/",
+            plot_name="plot",
         )
 
-    # TODO STEP 5: generate and save QRE report
-    # (currently only works on HLAScheduler)
+        output = generate_output_data_fit(parity_check_time, mean, std, plot_path)
+
+        plottable_output = generate_output_data_plot(
+            plot_params["xs"], plot_params["ys"], plot_params["es"]
+        )
+
+        # save plot data to json file
+        write_output_data(plottable_output, output_file_name="plottable.json")
+
+    else:
+        logical_error_rate = task_stats[0].errors / task_stats[0].shots
+        output = generate_output_data_ler(parity_check_time, logical_error_rate)
+
+    # Write output data to file
+    write_output_data(output, output_file_name="output.json")

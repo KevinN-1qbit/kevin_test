@@ -1,8 +1,0 @@
-{
-   "nb_fac":8,
-   "depot_entry":2,
-   "depot_exit":2,
-   "depot_capacity":16,
-   "distillation_protocol":"20:4",
-   "physical_qubit_error_rate":0.001
- }
