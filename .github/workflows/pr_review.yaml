@@ -20,3 +20,9 @@ jobs:
 
       - name: Run services and execute smoke tests
         run: docker-compose up -d --build && docker exec tests python3 ftqc/ftqc_smoke_tests.py
+
+      - name: healthcheck
+        run: docker exec tests curl http://ftqc-api:80/healthcheck
+
+      - name: Execute smoke tests
+        run: docker exec tests python3 ftqc/ftqc_smoke_tests.py
