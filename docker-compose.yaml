@@ -66,6 +66,17 @@ services:
     networks:
       - hansa-network
 
+  ftqc-tests:
+    image: quay.io/1qbit/qarrot-tests:ftqc.v0.1
+    container_name: tests
+    command: tail -F anything
+    volumes:
+      - hansa_data:/hansa_data
+    networks:
+      - hansa-network
+    environment:
+      API_PORT: 80
+
 networks:
   hansa-network:
     name: hansa-network
