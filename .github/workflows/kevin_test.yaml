@@ -1,0 +1,41 @@
+name: Docker Compose and API Endpoint Test
+
+on: 
+  - workflow_dispatch
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+        docker-compose --version
+
+    - name: Build and run Docker Compose
+      run: |
+        docker-compose up -d  # Use -d to run containers in the background
+        docker-compose ps    # Optional: check the running containers
+
+    - name: Wait for Service to Start
+      run: |
+        # Wait for your service to be ready (adjust the command as needed)
+        while ! curl -sSf http://localhost:8080/health; do
+          sleep 5
+        done
+
+    - name: Run API Endpoint Test
+      run: |
+        # You can use any testing tool or script to call your API endpoint here
+        # Example using curl to call an API endpoint
+        docker exec tests curl http://ftqc-api:80/healthcheck
+
+    - name: Clean up
+      run: |
+        docker-compose down --volumes --remove-orphans
