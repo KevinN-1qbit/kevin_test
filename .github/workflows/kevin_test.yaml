@@ -29,18 +29,17 @@ jobs:
       run: |
         docker-compose up -d  # Use -d to run containers in the background
         docker-compose ps    # Optional: check the running containers
-        curl http://localhost:8001/healthcheck
 
     - name: Wait for Service to Start
       run: |
         # Wait for your service to be ready (adjust the command as needed)
-        curl http://localhost:8001/healthcheck
+        sleep(30)
 
     - name: Run API Endpoint Test
       run: |
         # You can use any testing tool or script to call your API endpoint here
         # Example using curl to call an API endpoint
-        docker exec tests curl http://ftqc-api:80/healthcheck
+        docker exec tests python3 ftqc/ftqc_smoke_tests.py
 
     - name: Clean up
       run: |
