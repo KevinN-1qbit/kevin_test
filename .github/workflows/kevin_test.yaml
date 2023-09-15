@@ -34,7 +34,7 @@ jobs:
     - name: Wait for Service to Start
       run: |
         # Wait for your service to be ready (adjust the command as needed)
-        curl localhost:8000/healthcheck
+        curl http://localhost:8001/healthcheck
 
     - name: Run API Endpoint Test
       run: |

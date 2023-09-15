@@ -13,7 +13,7 @@ services:
       LOG_LEVEL_APP: 'DEBUG'
       LOG_FILE: "logs/ftqc_api.log"
     ports:
-      - 8000:80
+      - 8001:80
     volumes:
       - hansa_data:/hansa_data
       - ./api:/app/api
