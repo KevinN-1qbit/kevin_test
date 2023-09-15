@@ -3,6 +3,7 @@ import numpy as np
 from math import sqrt
 from scipy.optimize import curve_fit
 from noise import NoiseParams, NoiseModel
+import time
 
 if __name__ == "__main__":
     with open("default_input.json", "r") as read_file:
