@@ -121,10 +121,6 @@ async def decompose(request: SKRequest):
         # Send message to SK Node
         redis.rpush(sk_req_topic, message.json())
 
-        # Send waiting status to get request topic
-        status_message = json.dumps({"status": StatusEnum.waiting})
-        redis.rpush(request_id, status_message)
-
     except Exception as e:
         logger.error(e)
         raise HTTPException(
@@ -132,7 +128,7 @@ async def decompose(request: SKRequest):
             detail="Internal Error",
         )
 
-    response = SKResponse(request_id=request_id, status=StatusEnum.waiting)
+    response = SKResponse(request_id=request_id, status=StatusEnum.executing)
 
     logger.info(f"SKResponse = {{{response}}}")
     return response
@@ -145,22 +141,9 @@ async def decompose(request_id: str):
         SKSolutionResponse: Contains details about the SK solution
     """
     logger.info("()")
-
-    # Check if request_id exists in redis
-    topic = request_id
-    number_of_topic_exists = redis.exists(topic)
-    if number_of_topic_exists == 0:
-        err_msg = f"Invalid request id: {request_id}."
-        logger.error(err_msg)
-        raise HTTPException(
-            status_code=404,
-            detail=err_msg,
-        )
-
     try:
         topic = request_id
-        # Peek at the first element in topic
-        msg = redis.lindex(topic, 0)
+        msg = redis.lpop(topic)
 
     except Exception as e:
         logger.error(e)
@@ -168,9 +151,12 @@ async def decompose(request_id: str):
             status_code=500,
             detail="Internal Error",
         )
-
-    msg_dict = json.loads(msg.decode())
-    response = SKSolutionResponse(request_id=request_id, **msg_dict)
+    if msg:
+        msg_dict = json.loads(msg.decode())
+        response = SKSolutionResponse(request_id=request_id, **msg_dict)
+    else:
+        status = StatusEnum.executing
+        response = SKSolutionResponse(request_id=request_id, status=status)
 
     logger.info(f"SKSolutionResponse = {{{response}}}")
     return response

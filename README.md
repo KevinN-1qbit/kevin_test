@@ -25,3 +25,25 @@ Pleaser refer to the outline of the SK algorithm in Section 3 of the referenced 
 
 ### Additional usefull libraries for an extra context
 SK algorithm is implemented in Qiskit (Python library). Please refer to `solovay_kitaev_synthesis.py` of the Qiskit library.
+
+# Local Devepment with Docker
+
+## Build the image
+Ensure Docker is installed and run the following command from the root folder, which has the docker-compose.yml file:
+
+```
+docker-compose build
+```
+
+## Start up the Docker containers
+Start up the docker containers with this command:
+```
+docker-compose up -d
+```
+
+
+# Running Smoke Tests
+To run the smoke tests, after the containers are up and running you can run this command:
+```
+docker exec tests python3 sk/sk_smoke_tests.py
+```

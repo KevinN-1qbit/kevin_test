@@ -4,7 +4,6 @@ from typing import Optional
 
 
 class StatusEnum(str, Enum):
-    waiting = "waiting"
     done = "done"
     executing = "executing"
     failed = "failed"

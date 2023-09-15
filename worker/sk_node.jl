@@ -18,19 +18,7 @@ function handle_message(message)
 
     sk_output_path = output_path * request_id * "_post_sk.qasm"
     accumulated_error = 0
-    topic = request_id
     report_message = Dict()
-
-    # Update the status to executing in get request topic
-    try
-        lpop(redis, topic)
-        status_message = Dict("status" => "executing")
-        rpush(redis, topic, JSON.json(status_message))
-    catch e
-        err_msg = "Failed to update status in get request topic : $(request_id) to executing: $(e)"
-        @error err_msg
-        throw(Exception(err_msg))
-    end
 
     try
         accumulated_error = run_pipeline(circuit_path, sk_output_path, error_budget)
@@ -54,18 +42,11 @@ function handle_message(message)
     end
 
     @debug "report_message: $(report_message)"
+    # Serialize report message to JSON string
+    serialized_report = JSON.json(report_message)
 
-    try
-        # Serialize report content into a JSON string
-        serialized_report_string = JSON.json(report_message)
-        # Update the result and status in get request topic
-        lpop(redis, topic)
-        rpush(redis, topic, serialized_report_string)
-    catch e
-        err_msg = "Failed to update result in get request topic : $(request_id): $(e)"
-        @error err_msg
-        throw(Exception(err_msg))
-    end
+    topic = request_id
+    rpush(redis, topic, serialized_report)
 
     @info "handle_message() - SK finished"
 
