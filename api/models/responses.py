@@ -1,9 +1,10 @@
 from pydantic import BaseModel, Field
 from enum import Enum
-from typing import Optional, Dict
+from typing import Optional
 
 
 class StatusEnum(str, Enum):
+    waiting = "waiting"
     done = "done"
     executing = "executing"
     failed = "failed"
@@ -18,32 +19,18 @@ class HealthCheckResponse(BaseModel):
     )
 
 
-class ParityCheckTime(BaseModel):
-    value: float
-    unit: str
+class SKResponse(BaseModel):
+    """SK response model."""
+
+    request_id: str = Field(description="Id of the SK job request.")
+    status: StatusEnum = Field(description="Current status of SK job.")
 
 
-class FittingParam(BaseModel):
-    value: float
-    error: float
+class SKSolutionResponse(SKResponse):
+    """SKsolution response model."""
 
-
-class Fit(BaseModel):
-    functional_form: str
-    fitting_parameters: Dict[str, FittingParam]
-
-
-class FTQCResponse(BaseModel):
-    """FTQC response model."""
-
-    request_id: str = Field(description="Id of the ftqc circuit job request.")
-    status: StatusEnum = Field(description="Current status of circuit job.")
-
-
-class FTQCSolutionResponse(FTQCResponse):
-    """FTQC solution response model."""
-
-    parity_check_time: Optional[ParityCheckTime]
-    fit: Optional[Fit]
-    emulator_plot_path: Optional[str]
+    sk_circuit_path: Optional[str] = Field(description="Path of the SK circuit.")
+    accumulated_error: Optional[float] = Field(
+        description="Accumulated_error of the SK circuit."
+    )
     message: Optional[str] = Field(description="Error message when status is failed.")

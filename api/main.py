@@ -13,12 +13,12 @@ from fastapi.exceptions import RequestValidationError, ValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.models.requests import FTQCRequest, FTQCModel
+from api.models.requests import SKRequest, SKModel
 from api.models.responses import (
     HealthCheckResponse,
-    FTQCResponse,
+    SKResponse,
     StatusEnum,
-    FTQCSolutionResponse,
+    SKSolutionResponse,
 )
 
 # Load configs
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 # Set up Redis
 redis_host = config["Redis"]["host"]
 redis_port = config["Redis"]["port"]
-ftqc_req_topic = config["Redis"]["ftqc_req"]
+sk_req_topic = config["Redis"]["sk_req"]
 
 
 redis = Redis()
@@ -51,9 +51,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title=config["FTQCNode"]["title"],
-    version=config["FTQCNode"]["version"],
-    description="Documentation for the FTQC API",
+    title=config["SKNode"]["title"],
+    version=config["SKNode"]["version"],
+    description="Documentation for the SK API",
     lifespan=lifespan,
 )
 
@@ -98,27 +98,32 @@ def healthcheck():
     """
     logger.info("()")
     logger.info("- Return status OK")
-    application = config["FTQCNode"]["application"]
+    application = config["SKNode"]["application"]
     return HealthCheckResponse(status="OK", application=application)
 
 
-@app.post("/emulate", response_model=FTQCResponse)
-async def post_emulate(request: FTQCRequest):
-    """Creates a request and sends it to the FTQC node.
+@app.post("/decompose", response_model=SKResponse)
+async def decompose(request: SKRequest):
+    """Creates a request and sends it to the SK node.
     Returns:
         status (str): The status of the request.
-        template_id (str): The ftqc id of the request.
+        template_id (str): The SK id of the request.
     """
     logger.info("()")
+    logger.info(f"SKRequest = {{{request}}}")
     try:
         request_id = str(uuid4())
-        message = FTQCModel(
+        message = SKModel(
             **request.dict(exclude_unset=True),
             request_id=request_id,
         )
 
-        # Send message to FTQC Node
-        redis.rpush(ftqc_req_topic, message.json())
+        # Send message to SK Node
+        redis.rpush(sk_req_topic, message.json())
+
+        # Send waiting status to get request topic
+        status_message = json.dumps({"status": StatusEnum.waiting})
+        redis.rpush(request_id, status_message)
 
     except Exception as e:
         logger.error(e)
@@ -127,19 +132,31 @@ async def post_emulate(request: FTQCRequest):
             detail="Internal Error",
         )
 
-    response = FTQCResponse(request_id=request_id, status=StatusEnum.executing)
+    response = SKResponse(request_id=request_id, status=StatusEnum.waiting)
 
-    logger.info(f"FTQCResponse = {{{response}}}")
+    logger.info(f"SKResponse = {{{response}}}")
     return response
 
 
-@app.get("/emulate/{request_id}", response_model=FTQCSolutionResponse)
-async def get_emulated_report(request_id: str):
-    """Gets the report of given ftqc id.
+@app.get("/decompose/{request_id}", response_model=SKSolutionResponse)
+async def decompose(request_id: str):
+    """Gets the solution of given sk id.
     Returns:
-        FTQCSolutionResponse: Contains details about the ftqc solution
+        SKSolutionResponse: Contains details about the SK solution
     """
     logger.info("()")
+
+    # Check if request_id exists in redis
+    topic = request_id
+    number_of_topic_exists = redis.exists(topic)
+    if number_of_topic_exists == 0:
+        err_msg = f"Invalid request id: {request_id}."
+        logger.error(err_msg)
+        raise HTTPException(
+            status_code=404,
+            detail=err_msg,
+        )
+
     try:
         topic = request_id
         # Peek at the first element in topic
@@ -152,12 +169,8 @@ async def get_emulated_report(request_id: str):
             detail="Internal Error",
         )
 
-    if msg:
-        msg_dict = json.loads(msg.decode())
-        response = FTQCSolutionResponse(request_id=request_id, **msg_dict)
-    else:
-        status = StatusEnum.executing
-        response = FTQCSolutionResponse(request_id=request_id, status=status)
+    msg_dict = json.loads(msg.decode())
+    response = SKSolutionResponse(request_id=request_id, **msg_dict)
 
-    logger.info(f"FTQCSolutionResponse = {{{response}}}")
+    logger.info(f"SKSolutionResponse = {{{response}}}")
     return response

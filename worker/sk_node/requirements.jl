@@ -1,0 +1,12 @@
+using Pkg
+pkg"add NearestNeighbors"
+pkg"add LinearAlgebra"
+pkg"add StaticArrays"
+pkg"add JLD"
+pkg"add Distances"
+pkg"add IterTools"
+pkg"add OpenQASM"
+pkg"add Redis"
+pkg"add ConfParser"
+pkg"add JSON"
+pkg"precompile"

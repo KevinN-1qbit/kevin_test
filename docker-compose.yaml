@@ -1,44 +1,63 @@
 version: '3.9'
 services:
 # API services
-  ftqc-api:
-    image: quay.io/1qbit/qarrot-ftqc:api.v0.1
+  sk-api:
+    image: quay.io/1qbit/qarrot-sk:api.v0.1
     build:
       context: ./
       dockerfile: docker/Dockerfile_api
-    container_name: ftqc-api
+    container_name: sk-api
     command: [ "/start-reload.sh" ]
     environment:
       MODULE_NAME: 'api.main'
       LOG_LEVEL_APP: 'DEBUG'
-      LOG_FILE: "logs/ftqc_api.log"
+      LOG_FILE: "logs/worker.log"
     ports:
-      - 8001:80
+      - 8000:80
     volumes:
       - hansa_data:/hansa_data
       - ./api:/app/api
     networks:
       - hansa-network
 
-  ftqc-node:
-    platform: "linux/amd64"
-    image: quay.io/1qbit/qarrot-ftqc:node.v0.1
+  # sk-node:
+  #   image: quay.io/1qbit/qarrot-sk:node.v0.1
+  #   build:
+  #     context: ./
+  #     dockerfile: docker/Dockerfile_worker
+  #   container_name: sk-node
+  #   command: ["python3", "worker/sk_node.py"]
+  #   volumes:
+  #     - hansa_data:/hansa_data
+  #     - ./worker:/app/worker
+  #     - ./skalg:/app/skalg
+  #     # volume mount dummy data
+  #     - ./skalg/test.qasm:/hansa_data/test.qasm
+  #   environment:
+  #     LOG_LEVEL_APP: 'DEBUG'
+  #     LOG_FILE: "logs/worker.log"
+  #     JULIA_NUM_THREADS: 4
+  #   networks:
+  #     - hansa-network
+
+  sk-node-julia:
+    image: quay.io/1qbit/qarrot-sk:julia_node.v0.1
     build:
       context: ./
-      dockerfile: docker/Dockerfile_worker
-    container_name: ftqc-node
-    command: ["python3", "worker/ftqc_emulator_node.py"]
+      dockerfile: docker/Dockerfile_worker_julia
+    container_name: sk-node-julia
+    command: ["julia", "worker/sk_node.jl"]
     volumes:
       - hansa_data:/hansa_data
       - ./worker:/app/worker
-      - ./src:/app/src
+      - ./skalg:/app/skalg
       # volume mount dummy data
+      - ./skalg/test.qasm:/hansa_data/test.qasm
     environment:
-      LOG_LEVEL_APP: 'DEBUG'
-      LOG_FILE: "logs/worker.log"
+      JULIA_NUM_THREADS: 16
     networks:
       - hansa-network
-
+      
   redis:
     image: redis:latest
     container_name: redis
@@ -48,34 +67,15 @@ services:
     networks:
       - hansa-network
 
-  portal:
-    image: quay.io/1qbit/qarrot-portal:2023.09.12.9797d4df.v0.3.2
-    container_name: portal
+  stats:
+    image: virtualzone/docker-container-stats
+    container_name: stats
     ports:
-      - "3000:3000"
+      - '8080:8080'
     environment:
-      - TRANSPILER_API=http://transpiler-api
-      - COMPILER_API=http://compiler-api
-      - SK_API=http://sk-api
-      - FTQC_API=http://ftqc-api
-      - PRE_API=http://pre-api
-      - QARE_API=http://qare-api
-      - STORAGE_DIR=/hansa_data
+      STATS_UPDATE_INTERVAL: 3
     volumes:
-      - hansa_data:/app/hansa_data
-    networks:
-      - hansa-network
-
-  ftqc-tests:
-    image: quay.io/1qbit/qarrot-tests:ftqc.v0.1
-    container_name: tests
-    command: tail -F anything
-    volumes:
-      - hansa_data:/hansa_data
-    networks:
-      - hansa-network
-    environment:
-      API_PORT: 80
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
 
 networks:
   hansa-network:

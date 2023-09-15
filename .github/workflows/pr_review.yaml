@@ -30,7 +30,7 @@ jobs:
 
     - name: Run API Endpoint Test
       run: |
-        docker exec tests python3 ftqc/ftqc_smoke_tests.py
+        docker exec tests python3 sk/sk_smoke_tests.py
 
     - name: Clean up
       run: |

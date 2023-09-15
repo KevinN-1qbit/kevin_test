@@ -1,13 +1,7 @@
 import os
 
 
-def get_logging_config(slack_enabled=False, slack_webhook_id=""):
-    THIRD_PARTY_LOGGER_CONFIG = {
-        "level": "WARNING",
-        "handlers": ["console", "file"],
-        "propagate": False,
-    }
-
+def get_logging_config(slack_enabled, slack_webhook_id):
     LOGGING_CONFIG = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -21,10 +15,6 @@ def get_logging_config(slack_enabled=False, slack_webhook_id=""):
                 "handlers": ["console", "file"],
                 "propagate": False,
             },
-            # Add specific logger configurations
-            "matplotlib.font_manager": THIRD_PARTY_LOGGER_CONFIG,
-            "matplotlib.ticker": THIRD_PARTY_LOGGER_CONFIG,
-            "matplotlib.pyplot": THIRD_PARTY_LOGGER_CONFIG,
         },
         "handlers": {
             "console": {

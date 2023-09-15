@@ -8,7 +8,7 @@ import shutil
 import subprocess
 from logger.logger_config import get_logging_config
 from redis import Redis
-from src.main import emulate_ftqc_json
+from skalg.qiskit_sk import run_sk_pipeline
 from api.models.responses import StatusEnum
 
 # Load configs
@@ -26,35 +26,32 @@ redis_port = config["Redis"]["port"]
 
 # Create a global Redis instance
 redis = Redis(host=redis_host, port=redis_port)
-timeout_interval = config["FTQCNode"]["timeout_interval"]
+timeout_interval = config["SKNode"]["timeout_interval"]
 
 
-def ftqc_emulate(message):
+def decompose_sk(message):
     logger.info("()")
 
+    circuit_path = message["circuit_path"]
+    error_budget = message["error_budget"]
     request_id = message["request_id"]
-    code = message["code"]
-    number_of_cores = message["number_of_cores"]
-    protocol = message["protocol"]
-    decoder = message["decoder"]
-    qubit_technology = message["qubit_technology"]
-    output_dir = config["FTQCNode"]["output_dir"]
-    plot_filename = "ftqce_plot_" + request_id
+    output_path = config["SKNode"]["output_path"]
+
+    sk_output_path = output_path + request_id + "_post_sk.qasm"
     report_message = {}
 
     try:
-        logger.debug("Starting FTQC emulation")
-        report_message = emulate_ftqc_json(
-            code,
-            number_of_cores,
-            protocol,
-            decoder,
-            qubit_technology,
-            output_dir,
-            plot_filename,
-        )
-        report_message["status"] = StatusEnum.done
-        logger.debug("Done FTQC emulation")
+        run_sk_pipeline(circuit_path, sk_output_path, error_budget)
+
+        # TODO implement error calculation
+        accumulated_error = 0.0001
+
+        report_message = {
+            "status": StatusEnum.done,
+            "sk_circuit_path": sk_output_path,
+            "accumulated_error": accumulated_error,
+        }
+        logger.debug(f"SK circuit path: {{{sk_output_path}}}")
     except Exception as e:
         logger.error(f"Error Message: {e}")
 
@@ -66,25 +63,24 @@ def ftqc_emulate(message):
     # Serialize report message to JSON
     serialized_report = json.dumps(report_message)
 
-    # Push report message
-    report_topic = request_id
-    redis.rpush(report_topic, serialized_report)
+    # Push circuit path message
+    topic = request_id
+    redis.rpush(topic, serialized_report)
 
-    logger.info("FTQC emulation finished")
+    logger.info("SK finished")
 
 
 if __name__ == "__main__":
-    logger.info("Starting FTQC Node")
-    # Set up Redis
-    request_topic = config["Redis"]["ftqc_req"]
-    redis = Redis(host=redis_host, port=redis_port)
+    logger.info("Starting SK Node")
+
+    request_topic = config["Redis"]["SK_req"]
 
     while True:
         try:
             msg = redis.lpop(request_topic)
             if msg:
                 logger.info("Redis Msg received")
-                ftqc_emulate(json.loads(msg))
+                decompose_sk(json.loads(msg))
             else:
                 time.sleep(int(timeout_interval))
         except Exception as e:
