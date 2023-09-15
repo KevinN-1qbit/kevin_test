@@ -18,6 +18,13 @@ jobs:
         sudo apt-get install -y docker-compose
         docker-compose --version
 
+    - name: Login to Quay
+      uses: docker/login-action@v1
+      with:
+        registry: quay.io
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_PASSWORD }}
+
     - name: Build and run Docker Compose
       run: |
         docker-compose up -d  # Use -d to run containers in the background
