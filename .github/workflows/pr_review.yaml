@@ -22,7 +22,7 @@ jobs:
         run: docker-compose up -d --build
 
       - name: healthcheck
-        run: docker exec tests curl http://ftqc-api:80/healthcheck
+        run: docker exec -it tests curl http://ftqc-api:80/healthcheck
 
       - name: Execute smoke tests
-        run: docker exec tests python3 ftqc/ftqc_smoke_tests.py
+        run: docker exec -it tests python3 ftqc/ftqc_smoke_tests.py
