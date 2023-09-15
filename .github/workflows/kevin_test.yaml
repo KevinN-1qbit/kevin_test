@@ -33,9 +33,7 @@ jobs:
     - name: Wait for Service to Start
       run: |
         # Wait for your service to be ready (adjust the command as needed)
-        while ! curl -sSf http://localhost:8080/health; do
-          sleep 5
-        done
+        curl localhost:8000/healthcheck
 
     - name: Run API Endpoint Test
       run: |
