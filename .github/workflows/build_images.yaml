@@ -51,7 +51,7 @@ jobs:
           echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
 
       - name: Build and push sk image to Quay
-        if: ${{ github.events.inputs.sk_version }} == ''
+        if: ${{ github.events.inputs.sk_version }} != ''
         uses: docker/build-push-action@v2
         with:
           file: ./sk/Dockerfile_sk
@@ -59,7 +59,7 @@ jobs:
           push: true
 
       - name: Build and push transpiler image to Quay
-        if: ${{ github.events.inputs.transpiler_version }} == ''
+        if: ${{ github.events.inputs.transpiler_version }} != ''
         uses: docker/build-push-action@v2
         with:
           file: ./transpiler/Dockerfile_transpiler
@@ -67,7 +67,7 @@ jobs:
           push: true
 
       - name: Build and push compiler image to Quay
-        if: ${{ github.events.inputs.compiler_version }} == ''
+        if: ${{ github.events.inputs.compiler_version }} != ''
         uses: docker/build-push-action@v2
         with:
           file: ./compiler/Dockerfile_compiler
@@ -75,7 +75,7 @@ jobs:
           push: true
 
       - name: Build and push ftqc image to Quay
-        if: ${{ github.events.inputs.ftqc_version }} == ''
+        if: ${{ github.events.inputs.ftqc_version }} != ''
         uses: docker/build-push-action@v2
         with:
           file: ./ftqc/Dockerfile_ftqc
@@ -83,7 +83,7 @@ jobs:
           push: true
 
       - name: Build and push pre image to Quay
-        if: ${{ github.events.inputs.pre_version }} == ''
+        if: ${{ github.events.inputs.pre_version }} != ''
         uses: docker/build-push-action@v2
         with:
           file: ./pre/Dockerfile_pre
@@ -91,7 +91,7 @@ jobs:
           push: true
 
       - name: Build and push qare image to Quay
-        if: ${{ github.events.inputs.qare_version }} == ''
+        if: ${{ github.events.inputs.qare_version }} != ''
         uses: docker/build-push-action@v2
         with:
           file: ./qare/Dockerfile_qare
