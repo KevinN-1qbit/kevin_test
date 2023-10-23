@@ -1,4 +1,4 @@
-name: Build Test Images
+name: kevin test
 on:
   workflow_dispatch:
     inputs:
@@ -6,13 +6,20 @@ on:
         description: 'echo bla-bla-bla if not empty'
         required: false
 
-runs:
-  using: "composite"
-  steps:
-    - run: echo "start"
-      shell: bash
-    - run: echo "bla bla bla"
-      shell: bash
-      if: ${{ inputs.echo-bla }}
-    - run: echo "stop"
-      shell: bash
+jobs:
+  kevin_test:
+    name: Build the image and push it to Quay registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: bla-bla:
+        steps:
+          - run: echo "start"
+            shell: bash
+          - run: echo "bla bla bla"
+            shell: bash
+            if: ${{ inputs.echo-bla }}
+          - run: echo "stop"
+            shell: bash
