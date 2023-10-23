@@ -1,0 +1,69 @@
+#!usr/bin/env groovy
+pipeline {
+
+    agent { label 'jenkins_worker1' }
+    options {
+        timestamps ()
+        ansiColor('xterm')
+    } // options
+
+    stages {
+        stage ('Env Prep') {
+            steps {
+                // Quay login to access docker image repo
+                withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                                  credentialsId: "quay-1qbit-deployer",
+                                  usernameVariable: 'quay_user',
+                                  passwordVariable: 'quay_password']]) {
+                    echo "Logging into Quay as ${quay_user} ..."
+                    sh "docker login -u '${quay_user}' -p '${quay_password}' quay.io"
+                } // withCredentials
+            }    
+        } // stage ('Env Prep')
+
+        stage('Smoke Tests') {
+            parallel {
+                stage('SKD Tests') {
+                    steps {
+                        sh "docker run -e UPLOAD_API_URL=https://qarrot.1qbit-dev.com/api/upload -e API_URL=https://skd.1qbit-${ENVIRONMENT}.com \
+                         quay.io/1qbit/qarrot-tests:${SKD_TAG} python3 sk/sk_smoke_tests.py"
+                    }
+                }
+                stage('Transpiler Tests') {
+                    steps {
+                        sh "docker run -e UPLOAD_API_URL=https://qarrot.1qbit-dev.com/api/upload -e API_URL=https://transpiler.1qbit-${ENVIRONMENT}.com \
+                         quay.io/1qbit/qarrot-tests:${TRANSPILER_TAG} python3 transpiler/transpiler_smoke_tests.py"
+                    }
+                }
+                stage('Compiler Tests') {
+                    steps {
+                        sh "docker run -e UPLOAD_API_URL=https://qarrot.1qbit-dev.com/api/upload -e API_URL=https://compiler.1qbit-${ENVIRONMENT}.com \
+                         quay.io/1qbit/qarrot-tests:${COMPILER_TAG} python3 compiler/compiler_smoke_tests.py"
+                    }
+                }
+                stage('FTQC Tests') {
+                    steps {
+                        sh "docker run -e API_URL=https://ftqc.1qbit-${ENVIRONMENT}.com quay.io/1qbit/qarrot-tests:${FTQC_TAG} python3 ftqc/ftqc_smoke_tests.py"
+                    }
+                }
+                stage('PRE Tests') {
+                    steps {
+                        sh "docker run -e API_URL=https://pre.1qbit-${ENVIRONMENT}.com quay.io/1qbit/qarrot-tests:${PRE_TAG} python3 pre/pre_smoke_tests.py"
+                    }
+                }
+                stage('QARE Tests') {
+                    steps {
+                        sh "docker run -e API_URL=https://qare.1qbit-${ENVIRONMENT}.com quay.io/1qbit/qarrot-tests:${QARE_TAG} python3 qare/qare_smoke_tests.py"
+                    }
+                }
+            }
+        } // stage('Smoke Tests')
+        
+    } // stages
+     post {
+        always {
+            cleanWs()
+        } // always
+    } // post
+   
+} // pipeline
