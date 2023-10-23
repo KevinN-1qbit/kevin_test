@@ -51,6 +51,7 @@ jobs:
           echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
 
       - name: Build and push sk image to Quay
+        if: ${{ github.events.inputs.sk_version }}
         uses: docker/build-push-action@v2
         with:
           file: ./sk/Dockerfile_sk

@@ -1,0 +1,18 @@
+name: Build Test Images
+on:
+  workflow_dispatch:
+    inputs:
+      echo-bla:
+        description: 'echo bla-bla-bla if not empty'
+        required: false
+
+runs:
+  using: "composite"
+  steps:
+    - run: echo "start"
+      shell: bash
+    - run: echo "bla bla bla"
+      shell: bash
+      if: ${{ inputs.echo-bla }}
+    - run: echo "stop"
+      shell: bash
