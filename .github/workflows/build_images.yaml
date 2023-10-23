@@ -47,8 +47,7 @@ jobs:
         run: |
           sha=${GITHUB_SHA::8}
           timestamp=$(date +'%Y.%m.%d')
-          version=${{ github.event.inputs.version }}
-          echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
+          echo "::set-output name=BUILD_ID::${timestamp}.${sha}"
 
       - name: Build and push sk image to Quay
         if: ${{ github.events.inputs.sk_version  != '' }}
