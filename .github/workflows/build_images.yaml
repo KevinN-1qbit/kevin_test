@@ -1,11 +1,32 @@
-name: Build Image
+name: Build Test Images
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version of the image'
-        required: true
+      sk_version:
+        description: 'sk test image version'
+        required: false
         type: string
+      transpiler_version:
+        description: 'transpiler test image version'
+        required: false
+        type: string
+      compiler_version:
+        description: 'compiler test image version'
+        required: false
+        type: string
+      ftqc_version:
+        description: 'ftqc test image version'
+        required: false
+        type: string
+      pre_version:
+        description: 'pre test image version'
+        required: false
+        type: string
+      qare_version:
+        description: 'qare test image version'
+        required: false
+        type: string
+
 jobs:
   build_and_push_to_quay:
     name: Build the image and push it to Quay registry
@@ -29,17 +50,45 @@ jobs:
           version=${{ github.event.inputs.version }}
           echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
 
-      - name: Build and push API to Quay
+      - name: Build and push sk image to Quay
         uses: docker/build-push-action@v2
         with:
-          file: ./docker/Dockerfile_api
-          tags: quay.io/1qbit/qarrot-ftqc:api.${{ steps.tag-generator.outputs.BUILD_ID }}
+          file: ./sk/Dockerfile_sk
+          tags: quay.io/1qbit/qarrot-tests:sk.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
-      - name: Build and push worker node to Quay
+      - name: Build and push transpiler image to Quay
         uses: docker/build-push-action@v2
         with:
-          file: ./docker/Dockerfile_worker
-          tags: quay.io/1qbit/qarrot-ftqc:node.${{ steps.tag-generator.outputs.BUILD_ID }}
+          file: ./transpiler/Dockerfile_transpiler
+          tags: quay.io/1qbit/qarrot-tests:transpiler.${{ steps.tag-generator.outputs.BUILD_ID }}
+          push: true
+
+      - name: Build and push compiler image to Quay
+        uses: docker/build-push-action@v2
+        with:
+          file: ./compiler/Dockerfile_compiler
+          tags: quay.io/1qbit/qarrot-tests:compiler.${{ steps.tag-generator.outputs.BUILD_ID }}
+          push: true
+
+      - name: Build and push ftqc image to Quay
+        uses: docker/build-push-action@v2
+        with:
+          file: ./ftqc/Dockerfile_ftqc
+          tags: quay.io/1qbit/qarrot-tests:ftqc.${{ steps.tag-generator.outputs.BUILD_ID }}
+          push: true
+
+      - name: Build and push pre image to Quay
+        uses: docker/build-push-action@v2
+        with:
+          file: ./pre/Dockerfile_pre
+          tags: quay.io/1qbit/qarrot-tests:pre.${{ steps.tag-generator.outputs.BUILD_ID }}
+          push: true
+
+      - name: Build and push qare image to Quay
+        uses: docker/build-push-action@v2
+        with:
+          file: ./qare/Dockerfile_qare
+          tags: quay.io/1qbit/qarrot-tests:qare.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
           
