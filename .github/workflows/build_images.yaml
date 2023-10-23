@@ -55,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./sk/Dockerfile_sk
-          tags: quay.io/1qbit/qarrot-tests:sk.${{ steps.tag-generator.outputs.BUILD_ID.${{ github.events.inputs.sk_version }} }}
+          tags: quay.io/1qbit/qarrot-tests:sk.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.sk_version }}
           push: true
 
       - name: Build and push transpiler image to Quay
@@ -63,7 +63,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./transpiler/Dockerfile_transpiler
-          tags: quay.io/1qbit/qarrot-tests:transpiler.${{ steps.tag-generator.outputs.BUILD_ID.${{ github.events.inputs.transpiler_version }} }}
+          tags: quay.io/1qbit/qarrot-tests:transpiler.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.transpiler_version }}
           push: true
 
       - name: Build and push compiler image to Quay
@@ -71,7 +71,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./compiler/Dockerfile_compiler
-          tags: quay.io/1qbit/qarrot-tests:compiler.${{ steps.tag-generator.outputs.BUILD_ID.${{ github.events.inputs.compiler_version }} }}
+          tags: quay.io/1qbit/qarrot-tests:compiler.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.compiler_version }} 
           push: true
 
       - name: Build and push ftqc image to Quay
@@ -79,7 +79,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./ftqc/Dockerfile_ftqc
-          tags: quay.io/1qbit/qarrot-tests:ftqc.${{ steps.tag-generator.outputs.BUILD_ID.${{ github.events.inputs.ftqc_version }} }}
+          tags: quay.io/1qbit/qarrot-tests:ftqc.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.ftqc_version }}
           push: true
 
       - name: Build and push pre image to Quay
@@ -87,7 +87,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./pre/Dockerfile_pre
-          tags: quay.io/1qbit/qarrot-tests:pre.${{ steps.tag-generator.outputs.BUILD_ID.${{ github.events.inputs.pre_version }} }}
+          tags: quay.io/1qbit/qarrot-tests:pre.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.pre_version }}
           push: true
 
       - name: Build and push qare image to Quay
@@ -95,6 +95,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: ./qare/Dockerfile_qare
-          tags: quay.io/1qbit/qarrot-tests:qare.${{ steps.tag-generator.outputs.BUILD_ID.${{ github.events.inputs.qare_version }} }}
+          tags: quay.io/1qbit/qarrot-tests:qare.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.qare_version }}
           push: true
           
