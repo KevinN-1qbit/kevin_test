@@ -50,11 +50,11 @@ jobs:
         id: build-tools-flag
         run: |
           echo "::set-output name=BUILD_SK::${{ github.event.inputs.build_sk }}"
-          echo "::set-output name=build_transpiler::${{ github.event.inputs.build_transpiler }}"
-          echo "::set-output name=build_compiler::${{ github.event.inputs.build_compiler }}"
-          echo "::set-output name=build_ftqc::${{ github.event.inputs.build_ftqc }}"
-          echo "::set-output name=build_pre::${{ github.event.inputs.build_pre }}"
-          echo "::set-output name=build_qare::${{ github.event.inputs.build_qare }}"
+          echo "::set-output name=BUILD_TRANSPILER::${{ github.event.inputs.build_transpiler }}"
+          echo "::set-output name=BUILD_COMPILER::${{ github.event.inputs.build_compiler }}"
+          echo "::set-output name=BUILD_FTQC::${{ github.event.inputs.build_ftqc }}"
+          echo "::set-output name=BUILD_PRE::${{ github.event.inputs.build_pre }}"
+          echo "::set-output name=BUILD_QARE::${{ github.event.inputs.build_qare }}"
 
       - name: Generate tag
         id: tag-generator
@@ -66,14 +66,14 @@ jobs:
 
       - name: Build and push sk image to Quay
         uses: docker/build-push-action@v2
-        if: steps.build-tools-flag.outputs.build_sk == 'true'
+        if: steps.build-tools-flag.outputs.BUILD_SK == 'true'
         with:
           file: ./sk/Dockerfile_sk
           tags: quay.io/1qbit/qarrot-tests:sk.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
       - name: Build and push transpiler image to Quay
-        if: steps.build-tools-flag.outputs.build_transpiler 'true'
+        if: steps.build-tools-flag.outputs.BUILD_TRANSPILER == 'true'
         uses: docker/build-push-action@v2
         with:
           file: ./transpiler/Dockerfile_transpiler
