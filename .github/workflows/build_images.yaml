@@ -2,30 +2,34 @@ name: Build Test Images
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: 'Version of the images'
+        required: true
+        type: string
       build_sk:
-        description: 'sk test image version (Do not set to skip)'
+        description: 'Build sk'
         required: false
         type: boolean
-      transpiler_version:
-        description: 'transpiler test image version (Do not set to skip)'
+      build_transpiler:
+        description: 'Build transpiler'
         required: false
-        type: string
-      compiler_version:
-        description: 'compiler test image version (Do not set to skip)'
+        type: boolean
+      build_compiler:
+        description: 'Build compiler'
         required: false
-        type: string
-      ftqc_version:
-        description: 'ftqc test image version (Do not set to skip)'
+        type: boolean
+      build_ftqc:
+        description: 'Build ftqc'
         required: false
-        type: string
-      pre_version:
-        description: 'pre test image version (Do not set to skip)'
+        type: boolean
+      build_pre:
+        description: 'Build pre'
         required: false
-        type: string
-      qare_version:
-        description: 'qare test image version (Do not set to skip)'
+        type: boolean
+      build_qare:
+        description: 'Build qare'
         required: false
-        type: string
+        type: boolean
 
 jobs:
   build_and_push_to_quay:
@@ -42,6 +46,16 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}    
 
+      - name: Set flag whether to build tool or not
+        id: build-tools-flag
+        run: |
+          echo "::set-output name=build_sk::${{ github.event.inputs.build_sk }}"
+          echo "::set-output name=build_transpiler::${{ github.event.inputs.build_transpiler }}"
+          echo "::set-output name=build_compiler::${{ github.event.inputs.build_compiler }}"
+          echo "::set-output name=build_ftqc::${{ github.event.inputs.build_ftqc }}"
+          echo "::set-output name=build_pre::${{ github.event.inputs.build_pre }}"
+          echo "::set-output name=build_qare::${{ github.event.inputs.build_qare }}"
+
       - name: Generate tag
         id: tag-generator
         run: |
@@ -51,50 +65,46 @@ jobs:
           echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
 
       - name: Build and push sk image to Quay
-        if: ${{ github.events.inputs.sk_version  != '' }}
+        if: steps.build-tools-flag.outputs.build_sk
         uses: docker/build-push-action@v2
         with:
           file: ./sk/Dockerfile_sk
-          tags: quay.io/1qbit/qarrot-tests:sk.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.sk_version }}
+          tags: quay.io/1qbit/qarrot-tests:sk.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
       - name: Build and push transpiler image to Quay
-        if: ${{ github.events.inputs.transpiler_version != '' }}
+        if: steps.build-tools-flag.outputs.build_transpiler
         uses: docker/build-push-action@v2
         with:
           file: ./transpiler/Dockerfile_transpiler
-          tags: quay.io/1qbit/qarrot-tests:transpiler.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.transpiler_version }}
+          tags: quay.io/1qbit/qarrot-tests:transpiler.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
       - name: Build and push compiler image to Quay
-        if: ${{ github.events.inputs.compiler_version != '' }}
         uses: docker/build-push-action@v2
         with:
           file: ./compiler/Dockerfile_compiler
-          tags: quay.io/1qbit/qarrot-tests:compiler.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.compiler_version }} 
+          tags: quay.io/1qbit/qarrot-tests:compiler.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
       - name: Build and push ftqc image to Quay
-        if: ${{ github.events.inputs.ftqc_version != '' }}
         uses: docker/build-push-action@v2
         with:
           file: ./ftqc/Dockerfile_ftqc
-          tags: quay.io/1qbit/qarrot-tests:ftqc.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.ftqc_version }}
+          tags: quay.io/1qbit/qarrot-tests:ftqc.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
       - name: Build and push pre image to Quay
-        if: ${{ github.events.inputs.pre_version != '' }}
         uses: docker/build-push-action@v2
         with:
           file: ./pre/Dockerfile_pre
-          tags: quay.io/1qbit/qarrot-tests:pre.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.pre_version }}
+          tags: quay.io/1qbit/qarrot-tests:pre.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
       - name: Build and push qare image to Quay
-        if: ${{ github.events.inputs.qare_version != '' }}
         uses: docker/build-push-action@v2
         with:
           file: ./qare/Dockerfile_qare
-          tags: quay.io/1qbit/qarrot-tests:qare.${{ steps.tag-generator.outputs.BUILD_ID }}.${{ github.events.inputs.qare_version }}
+          tags: quay.io/1qbit/qarrot-tests:qare.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
           
