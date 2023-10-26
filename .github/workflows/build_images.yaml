@@ -49,7 +49,7 @@ jobs:
       - name: Set flag whether to build tool or not
         id: build-tools-flag
         run: |
-          echo "::set-output name=build_sk::${{ github.event.inputs.build_sk }}"
+          echo "::set-output name=BUILD_SK::${{ github.event.inputs.build_sk }}"
           echo "::set-output name=build_transpiler::${{ github.event.inputs.build_transpiler }}"
           echo "::set-output name=build_compiler::${{ github.event.inputs.build_compiler }}"
           echo "::set-output name=build_ftqc::${{ github.event.inputs.build_ftqc }}"
@@ -65,15 +65,15 @@ jobs:
           echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
 
       - name: Build and push sk image to Quay
-        if: steps.build-tools-flag.outputs.build_sk
         uses: docker/build-push-action@v2
+        if: steps.build-tools-flag.outputs.build_sk == 'true'
         with:
           file: ./sk/Dockerfile_sk
           tags: quay.io/1qbit/qarrot-tests:sk.${{ steps.tag-generator.outputs.BUILD_ID }}
           push: true
 
       - name: Build and push transpiler image to Quay
-        if: steps.build-tools-flag.outputs.build_transpiler
+        if: steps.build-tools-flag.outputs.build_transpiler 'true'
         uses: docker/build-push-action@v2
         with:
           file: ./transpiler/Dockerfile_transpiler
