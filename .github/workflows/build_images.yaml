@@ -5,7 +5,7 @@ on:
       build_sk:
         description: 'sk test image version (Do not set to skip)'
         required: false
-        default: false
+        type: boolean
       transpiler_version:
         description: 'transpiler test image version (Do not set to skip)'
         required: false
