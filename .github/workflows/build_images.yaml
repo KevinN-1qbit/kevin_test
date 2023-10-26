@@ -2,10 +2,10 @@ name: Build Test Images
 on:
   workflow_dispatch:
     inputs:
-      sk_version:
+      build_sk:
         description: 'sk test image version (Do not set to skip)'
         required: false
-        type: string
+        default: false
       transpiler_version:
         description: 'transpiler test image version (Do not set to skip)'
         required: false
@@ -47,7 +47,8 @@ jobs:
         run: |
           sha=${GITHUB_SHA::8}
           timestamp=$(date +'%Y.%m.%d')
-          echo "::set-output name=BUILD_ID::${timestamp}.${sha}"
+          version=${{ github.event.inputs.version }}
+          echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
 
       - name: Build and push sk image to Quay
         if: ${{ github.events.inputs.sk_version  != '' }}
