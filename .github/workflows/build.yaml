@@ -1,0 +1,58 @@
+
+name: Build Image
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of the image'
+        required: true
+        type: string
+
+jobs:
+  build_and_push_to_quay:
+    name: Build the image and push it to Quay registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Login to Quay
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}    
+
+      - name: Generate tag
+        id: tag-generator
+        run: |
+          sha=${GITHUB_SHA::8}
+          timestamp=$(date +'%Y.%m.%d')
+          version=${{ github.event.inputs.version }}
+          if [ ${{ github.event_name }} == 'push' ] && [ ${{ github.ref }} == 'refs/heads/main' ]; then
+            echo "::set-output name=BUILD_ID::latest"
+          else
+            echo "::set-output name=BUILD_ID::${timestamp}.${sha}.${version}"
+          fi
+
+      - name: Build and push worker node to Quay
+        uses: docker/build-push-action@v2
+        with:
+          file: ./docker/Dockerfile_worker
+          tags: quay.io/1qbit/qarrot-transpiler:node.${{ steps.tag-generator.outputs.BUILD_ID }}
+          push: true
+          github-token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Build and push API to Quay
+        uses: docker/build-push-action@v2
+        with:
+          file: ./docker/Dockerfile_api
+          tags: quay.io/1qbit/qarrot-transpiler:api.${{ steps.tag-generator.outputs.BUILD_ID }}
+          push: true
+          github-token: ${{ secrets.PAT_TOKEN }}
