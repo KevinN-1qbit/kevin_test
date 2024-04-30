@@ -1,0 +1,123 @@
+version: '3.9'
+services:
+  # API services
+  transpiler-api:
+    image: quay.io/1qbit/qarrot-transpiler:api.v0.1
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile_api
+    container_name: transpiler-api
+    command: [ "/start-reload.sh" ]
+    environment:
+      MODULE_NAME: 'api.main'
+      LOG_LEVEL_APP: 'DEBUG'
+      LOG_FILE: "logs/transpiler_api.log"
+    ports:
+      - 8000:80
+    volumes:
+      - hansa_data:/hansa_data
+      - ./api:/app/api
+      - ./shared:/app/shared
+      - ./config:/app/config
+    networks:
+      - hansa-network
+
+  transpiler-node:
+    image: quay.io/1qbit/qarrot-transpiler:node.v0.1
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile_worker
+    container_name: transpiler-node
+    command: [ "python3", "worker/transpiler_node.py" ]
+    volumes:
+      - hansa_data:/hansa_data
+      - ./worker:/app/worker
+      - ./utils:/app/utils
+      - type: bind
+        source: ./src/cpp_compiler/LysCompiler.cpp
+        target: /app/src/cpp_compiler/LysCompiler.cpp
+      - ./src/main.py:/app/src/main.py
+      - ./data/output:/app/data/output
+      - ./data/input/test_circuits:/app/data/test_circuits
+      # volume mount dummy data
+      - ./data/input/test_circuits:/hansa_data/test_circuits
+      - ./shared:/app/shared
+      - ./config:/app/config
+    environment:
+      LOG_LEVEL_APP: 'DEBUG'
+      LOG_FILE: "logs/worker.log"
+    networks:
+      - hansa-network
+
+  transpiler-tests:
+    image: quay.io/1qbit/qarrot-tests:transpiler.v0.1
+    container_name: tests
+    command: tail -F anything
+    volumes:
+      - hansa_data:/hansa_data
+    networks:
+      - hansa-network
+    environment:
+      API_URL: "http://transpiler-api:80"
+      UPLOAD_API_URL: "http://portal:3000/api/upload"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - hansa-network
+
+  portal:
+    image: quay.io/1qbit/qarrot-portal:2024.03.22.c35e2e49.v0.1.18
+    container_name: portal
+    ports:
+      - "3000:3000"
+    environment:
+      - TRANSPILER_API=http://transpiler-api
+      - COMPILER_API=http://compiler-api
+      - SK_API=http://sk-api
+      - FTQC_API=http://ftqc-api
+      - PRE_API=http://pre-api
+      - QARE_API=http://qare-api
+      - STORAGE_DIR=/hansa_data
+    volumes:
+      - hansa_data:/app/hansa_data
+    networks:
+      - hansa-network
+
+  crud:
+    image: quay.io/1qbit/qarrot-crud:v0.1
+    container_name: crud-server
+    command: [ "/start-reload.sh" ]
+    environment:
+      MODULE_NAME: 'crud_server.main'
+      LOG_LEVEL_APP: 'DEBUG'
+      LOG_FILE: "logs/crud_server.log"
+      MONGO_DB_USERNAME: '${MONGO_DB_USER}'
+      MONGO_DB_PASSWORD: '${MONGO_DB_PASSWORD}'
+    ports:
+      - 8010:80
+    networks:
+      - hansa-network
+
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo-db
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: '${MONGO_DB_USER}'
+      MONGO_INITDB_ROOT_PASSWORD: '${MONGO_DB_PASSWORD}'
+    networks:
+      - hansa-network
+
+networks:
+  hansa-network:
+    name: hansa-network
+
+volumes:
+  hansa_data:

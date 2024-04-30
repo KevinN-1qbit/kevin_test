@@ -1,0 +1,39 @@
+[2024-04-03 13:54:51] [__main__] [INFO][get_cfg] ()
+[2024-04-03 13:54:51] [__main__] [INFO][parse_args] ()
+[2024-04-03 13:54:51] [__main__] [INFO][parse_args] args=Namespace(input='data/input/test_circuits/qasm_test_10_lines.qasm', output_path='', time_out=2147483647, remove_non_t=True, recompile=False, language='qasm', epsilon=1e-10, bypass_optimization=False, optimizer_executable='qarrot-optimizer/target/release/qarrot-optimizer', version=None)
+[2024-04-03 13:54:51] [__main__] [INFO][parse_args] - Return
+[2024-04-03 13:54:51] [__main__] [INFO][get_cfg] config={'input': 'data/input/test_circuits/qasm_test_10_lines.qasm', 'output_path': '', 'language': 'qasm', 'remove_non_t': True, 'time_out': 2147483647, 'recompile_cpp': False, 'epsilon': 1e-10, 'bypass_optimization': False, 'optimizer_executable': 'qarrot-optimizer/target/release/qarrot-optimizer'}
+[2024-04-03 13:54:51] [__main__] [INFO][get_cfg] - Return
+[2024-04-03 13:54:51] [__main__] [INFO][main] cfg={'input': 'data/input/test_circuits/qasm_test_10_lines.qasm', 'output_path': '', 'language': 'qasm', 'remove_non_t': True, 'time_out': 2147483647, 'recompile_cpp': False, 'epsilon': 1e-10, 'bypass_optimization': False, 'optimizer_executable': 'qarrot-optimizer/target/release/qarrot-optimizer'}
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] ()
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] circuit_file_path=data/input/test_circuits/qasm_test_10_lines.qasm
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] language=qasm
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] output_path=
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] optimizer_executable=qarrot-optimizer/target/release/qarrot-optimizer
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] remove_non_t=True
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] time_out=2147483647
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] recompile_cpp=False
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] epsilon=1e-10
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] bypass_optimization=False
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] redis_handler=None
+[2024-04-03 13:54:51] [__main__] [INFO][get_parser_and_circuit_input] cfg={'input': 'data/input/test_circuits/qasm_test_10_lines.qasm', 'language': 'qasm', 'output_path': '', 'remove_non_t': True, 'time_out': 2147483647, 'recompile_cpp': False, 'epsilon': 1e-10, 'bypass_optimization': False, 'optimizer_executable': 'qarrot-optimizer/target/release/qarrot-optimizer'}
+[2024-04-03 13:54:51] [__main__] [INFO][get_parser_and_circuit_input] chosen_parser=<class 'utils.parse.ParseQasm'>
+[2024-04-03 13:54:51] [__main__] [INFO][get_parser_and_circuit_input] circuit_input=data/input/test_circuits/qasm_test_10_lines.qasm
+[2024-04-03 13:54:51] [__main__] [INFO][get_parser_and_circuit_input] - Return
+[2024-04-03 13:54:51] [__mp_main__] [INFO][get_transpiled_circuit] parser=<class 'utils.parse.ParseQasm'>
+[2024-04-03 13:54:51] [__mp_main__] [INFO][get_transpiled_circuit] file=data/input/test_circuits/qasm_test_10_lines.qasm
+[2024-04-03 13:54:51] [__mp_main__] [INFO][get_transpiled_circuit] cfg={'input': 'data/input/test_circuits/qasm_test_10_lines.qasm', 'language': 'qasm', 'output_path': '', 'remove_non_t': True, 'time_out': 2147483647, 'recompile_cpp': False, 'epsilon': 1e-10, 'bypass_optimization': False, 'optimizer_executable': 'qarrot-optimizer/target/release/qarrot-optimizer'}
+[2024-04-03 13:54:51] [__mp_main__] [INFO][get_transpiled_circuit] [2024-04-03T20:54:51.959Z INFO  qarrot_optimizer] circuit has 16 qubits; using basis size 16
+[2024-04-03T20:54:51.959Z INFO  qarrot_optimizer] reading circuit and running initial reduction…
+[2024-04-03T20:54:51.960Z INFO  qarrot_optimizer] initialized optimizer in 1.084574ms
+[2024-04-03T20:54:51.960Z INFO  qarrot_optimizer] beginning round 1; pushing T gates forward…
+[2024-04-03T20:54:51.966Z INFO  qarrot_optimizer] pushed T gates forward in 6.00096ms. currently 28 operations (3 t gates). partitioning (fast approximate)…
+[2024-04-03T20:54:51.966Z INFO  qarrot_optimizer] partitioned gates in 155.829µs. currently 19 total operations, 3 t gates
+[2024-04-03T20:54:51.966Z INFO  qarrot_optimizer] finished optimizing circuit from 12 operations (final T count: 3) after 1 rounds, taking 6.189478ms (6.00096ms pushing T gates forward, 155.829µs partitioning).
+[2024-04-03T20:54:51.966Z INFO  qarrot_optimizer] saving optimized circuit…
+
+[2024-04-03 13:54:51] [__mp_main__] [INFO][get_transpiled_circuit] Successfully wrote to _transpile.txt
+[2024-04-03 13:54:51] [__mp_main__] [INFO][get_transpiled_circuit] - Return
+[2024-04-03 13:54:51] [__main__] [INFO][transpile] - Return
+[2024-04-03 13:54:51] [__main__] [INFO][main] Transpilation completed. Result has been written to directory: data/output
+[2024-04-03 13:54:51] [__main__] [INFO][main] - Return

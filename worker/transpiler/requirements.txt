@@ -1,0 +1,4 @@
+pydantic==1.10.8
+redis==4.6.0
+requests==2.26.0
+parsimonious==0.10.0

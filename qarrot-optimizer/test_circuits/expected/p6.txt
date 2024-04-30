@@ -1,0 +1,15 @@
+Rotate 1: IX
+Rotate -1: IY
+Rotate 1: IX
+Rotate -1: IY
+Rotate -1: YY
+Rotate 1: ZY
+Rotate 1: XI
+Rotate -1: YY
+Rotate 1: XI
+Rotate -1: YY
+Rotate 1: ZY
+Rotate -1: YX
+Rotate -1: IZ
+Measure -: ZI
+Measure +: ZZ

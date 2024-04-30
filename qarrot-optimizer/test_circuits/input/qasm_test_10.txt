@@ -1,0 +1,12 @@
+Rotate 2: ZII
+Rotate 2: XII
+Rotate 2: ZII
+Rotate 1: IIZ
+Rotate 1: IZI
+Rotate 1: ZII
+Rotate 2: IZX
+Rotate -2: IZI
+Rotate -2: IIX
+Rotate 2: ZXI
+Rotate -2: ZII
+Rotate -2: IXI

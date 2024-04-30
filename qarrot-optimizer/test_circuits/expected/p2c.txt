@@ -1,0 +1,4 @@
+Rotate 1: IXI
+Measure +: ZXZ
+Measure +: ZXI
+Measure +: ZIZ

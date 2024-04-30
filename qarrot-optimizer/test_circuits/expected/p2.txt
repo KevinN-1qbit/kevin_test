@@ -1,0 +1,13 @@
+Rotate -1: IIIIZ
+Rotate 1: IIZII
+Rotate 1: IIZIZ
+Rotate -1: IIZXZ
+Rotate -1: IZIII
+Rotate -1: IZZXZ
+Rotate 1: IZIXI
+Rotate 1: ZIIII
+Measure +: ZZZIZ
+Measure +: IZZXZ
+Measure +: IIXIX
+Measure +: ZZZXZ
+Measure +: IIZIZ

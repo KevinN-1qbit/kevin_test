@@ -1,0 +1,6 @@
+Rotate -1: ZI
+Rotate -1: IZ
+Rotate 1: ZZ
+Rotate -1: YY
+Measure +: ZZ
+Measure -: YY

@@ -1,0 +1,13 @@
+Rotate -1: ZI
+Rotate -1: IZ
+Rotate 2: XZ
+Rotate -2: IZ
+Rotate -2: XI
+Rotate 2: IZ
+Rotate 2: IX
+Rotate 2: IZ
+Rotate 2: ZX
+Rotate -2: ZI
+Rotate -2: IX
+Rotate 1: ZI
+Rotate 1: IZ
